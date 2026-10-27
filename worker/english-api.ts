@@ -1,7 +1,7 @@
 import {englishLessons,catalogWords} from '../src/english-lessons';
 import {z} from 'zod';
 import type {User} from './types';
-const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'private, no-store'}});
+import {json} from './auth';
 const text=(n:number)=>z.string().trim().min(1).max(n).refine(v=>!v.includes('\0'));
 async function readBody(request:Request){
  const limit=110000;

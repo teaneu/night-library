@@ -31,15 +31,16 @@ test('guest sessions work before OAuth setup; forged identity headers never auth
   const db=database();const env=makeEnv(db);
   let response=await worker.fetch(req('/api/session'),{...env,GOOGLE_CLIENT_SECRET:''});
   assert.deepEqual(await response.json(),{user:null,loginAvailable:false});
+  assert.match(response.headers.get('x-robots-tag'),/noindex/);
   response=await worker.fetch(req('/api/english',{headers:{'oai-authenticated-user-id':'alice','oai-authenticated-user-email':'alice@example.test'}}),env);
-  assert.equal(response.status,401);assert.match(response.headers.get('cache-control'),/no-store/);
+  assert.equal(response.status,401);assert.match(response.headers.get('cache-control'),/no-store/);assert.match(response.headers.get('x-robots-tag'),/noindex/);
   db.sqlite.close();
 });
 
 test('translation ownership, completion validation, CSRF, pagination and reviews use real SQLite',async()=>{
   const db=database();const env=makeEnv(db);const a=await session(db);const b=await session(db,'bob','b'.repeat(43));
   const call=(body,cookie=a,requestOrigin=origin)=>worker.fetch(req('/api/english',{method:'PUT',headers:{cookie,origin:requestOrigin,'content-type':'application/json'},body:JSON.stringify(body)}),env);
-  const get=async(cookie=a,cursor='')=>{const r=await worker.fetch(req('/api/english'+(cursor?'?cursor='+encodeURIComponent(cursor):''),{headers:{cookie}}),env);assert.equal(r.status,200);return r.json();};
+  const get=async(cookie=a,cursor='')=>{const r=await worker.fetch(req('/api/english'+(cursor?'?cursor='+encodeURIComponent(cursor):''),{headers:{cookie}}),env);assert.equal(r.status,200);assert.match(r.headers.get('x-robots-tag'),/noindex/);return r.json();};
   const lesson=englishLessons[0];const p={type:'practice',articleId:lesson.id,translations:lesson.paragraphs.map(()=> '내 해석'),reviewed:lesson.paragraphs.map(()=>true),completed:true};
   assert.equal((await call(p,a,'https://evil.test')).status,403);
   assert.equal((await call({...p,reviewed:p.reviewed.map(()=>false)})).status,400);
