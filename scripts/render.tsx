@@ -11,13 +11,13 @@ import {PublicLayout,EnglishDirectory,StudyGuide,About,Privacy,ArticlePage} from
 const escape=(s:string)=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const jsonLd=(value:unknown)=>JSON.stringify(value).replaceAll('<','\\u003c');
 type Route={path:string;title:string;description:string;node:ReactNode;kind?:'article'|'collection';articleId?:string};
-type SearchVerification={googleVerification?:string;naverVerification?:string};
+type RenderOptions={adsensePublisherId?:string;googleVerification?:string;naverVerification?:string};
 
-export async function render(origin:string,options:SearchVerification={}){
+export async function render(origin:string,options:RenderOptions={}){
   if(origin){const u=new URL(origin);if(u.protocol!=='https:'||u.origin!==origin.replace(/\/$/,''))throw Error('SITE_URL은 경로 없는 실제 HTTPS 주소여야 합니다.');origin=u.origin;}
   const html=await readFile('dist/index.html','utf8');
   const styles=[...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*>/g)].map(x=>x[0]).join('');
-  const publisher=process.env.ADSENSE_PUBLISHER_ID??'';
+  const publisher=options.adsensePublisherId??process.env.ADSENSE_PUBLISHER_ID??'';
   if(publisher&&!/^ca-pub-\d{16}$/.test(publisher))throw Error('ADSENSE_PUBLISHER_ID 형식을 확인하세요.');
   let verification=publisher?`<meta name="google-adsense-account" content="${publisher}">`:'';
   for(const [name,value] of [['google-site-verification',options.googleVerification],['naver-site-verification',options.naverVerification]]){

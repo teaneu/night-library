@@ -7,6 +7,7 @@ await build({entryPoints:['scripts/render.tsx'],outfile:'.cache/render.mjs',bund
 const {render}=await import('../.cache/render.mjs');
 const config=JSON.parse(await readFile('wrangler.json','utf8'));
 await render(process.env.SITE_URL||config.vars.APP_URL||'',{
+  adsensePublisherId:process.env.ADSENSE_PUBLISHER_ID||config.vars.ADSENSE_PUBLISHER_ID||'',
   googleVerification:process.env.GOOGLE_SITE_VERIFICATION||config.vars.GOOGLE_SITE_VERIFICATION||'',
   naverVerification:process.env.NAVER_SITE_VERIFICATION||config.vars.NAVER_SITE_VERIFICATION||'',
 });

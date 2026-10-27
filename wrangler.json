@@ -14,6 +14,7 @@
   "vars": {
     "APP_URL": "https://night-library-394.pages.dev",
     "GOOGLE_CLIENT_ID": "149204140774-d0g274717h0uhsegca05nvvkvch7gcvh.apps.googleusercontent.com",
-    "GOOGLE_SITE_VERIFICATION": "Vpy9MIY2rfrf8FnE8seRw7Cdtvcg8J8KhG-jGTzQEFk"
+    "GOOGLE_SITE_VERIFICATION": "Vpy9MIY2rfrf8FnE8seRw7Cdtvcg8J8KhG-jGTzQEFk",
+    "ADSENSE_PUBLISHER_ID": "ca-pub-1238487560887980"
   }
 }
