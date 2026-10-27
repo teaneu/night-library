@@ -14,11 +14,17 @@ Pages를 선택한 이유는 무료 `프로젝트이름.pages.dev` 주소와 Git
 
 저장소: https://github.com/teaneu/night-library
 
-Cloudflare D1 `night-library-db`는 이미 생성했으며 전달받은 Database ID를 `wrangler.json`에 반영했습니다. 원격 테이블 생성, Pages 프로젝트 배포, Google 로그인 연결은 아래 순서로 진행합니다. 이전 Sites 배포는 별개의 사이트이며 그대로 남습니다.
+운영 주소: https://night-library-394.pages.dev/
+
+Cloudflare D1 `night-library-db`는 이미 생성했으며 전달받은 Database ID를 `wrangler.json`에 반영했습니다. Cloudflare Pages 배포도 완료했습니다. 운영 주소와 개인정보 페이지의 HTTP 200 응답, D1 바인딩 설정을 확인했습니다. Google 로그인 연결과 실제 학습 기록 저장 확인이 남아 있습니다. 이전 Sites 배포는 별개의 사이트이며 그대로 남습니다.
+
+`d14c05f4.night-library-394.pages.dev`처럼 앞에 배포 ID가 붙은 주소는 특정 배포의 미리보기 주소입니다. 로그인 설정, 사이트 공유, 심사 신청에는 위의 고정 운영 주소를 사용합니다.
 
 ## 1. 컴퓨터에서 실행 준비
 
 Windows에서 Node.js 24 LTS를 설치합니다. Git 명령으로 소스를 관리하려면 Git도 설치합니다.
+
+PowerShell에서는 `npm.ps1` 실행 정책 오류를 피하도록 아래 예제의 `npm.cmd`와 `npx.cmd`를 사용합니다. Cloudflare 빌드 화면에는 `npm run build`를 그대로 입력합니다.
 
 - Node.js: https://nodejs.org/
 - Git: https://git-scm.com/downloads
@@ -33,10 +39,10 @@ cd night-library
 ```
 
 ```powershell
-npm ci
-npm run check
-npm run build
-npm test
+npm.cmd ci
+npm.cmd run check
+npm.cmd run build
+npm.cmd test
 ```
 
 `npm ci`는 설치, `check`는 타입 검사, `build`는 정적 화면 생성, `test`는 로그인·저장·사용자 격리 검사입니다. 테스트는 빌드 결과도 검사하므로 먼저 `build`를 실행합니다.
@@ -44,8 +50,8 @@ npm test
 로컬 미리보기는 다음 명령을 순서대로 실행합니다.
 
 ```powershell
-npm run db:local
-npm run preview
+npm.cmd run db:local
+npm.cmd run preview
 ```
 
 터미널에 표시된 주소를 엽니다. Google 로그인 설정 전에도 읽기·해석·해설 확인은 가능합니다. 로그인과 계정 저장은 아래 설정 후 열립니다. 미리보기 종료는 `Ctrl+C`입니다.
@@ -55,8 +61,8 @@ npm run preview
 `night-library-db`를 다시 만들 필요는 없습니다. Database ID가 소스에 반영되어 있으므로 다음 명령을 실행합니다.
 
 ```powershell
-npx wrangler login
-npm run db:migrate
+npx.cmd wrangler login
+npm.cmd run db:migrate
 ```
 
 브라우저에서 D1을 만든 본인 Cloudflare 계정으로 로그인하고, Wrangler의 계정 접근을 승인합니다. 여러 Cloudflare 계정이 나오면 해당 DB가 있는 계정을 선택합니다.
@@ -100,7 +106,7 @@ Cloudflare 대시보드에서 다음 순서로 진행합니다. 화면에 표시
 프로젝트 이름을 `night-library`와 다르게 만들었다면 로컬 설정도 맞춥니다.
 
 ```powershell
-npm run configure -- --name 실제프로젝트이름
+npm.cmd run configure -- --name 실제프로젝트이름
 ```
 
 처음에는 로그인 설정이 없어 읽기 화면만 열리는 것이 정상입니다. 기본 페이지에서 "로그인·저장 기능은 운영자의 연결 설정 후 열립니다"라는 안내가 나옵니다.
@@ -115,10 +121,10 @@ npm run configure -- --name 실제프로젝트이름
 
 ### 5-1. 실제 사이트 주소 설정
 
-아래의 URL을 Cloudflare가 알려 준 **실제 운영 주소**로 바꿉니다. 주소 뒤에 `/auth`나 다른 경로를 붙이지 않습니다.
+고정 운영 주소는 이미 `wrangler.json`의 `vars.APP_URL`에 반영했습니다. 같은 값을 직접 설정하려면 아래 명령을 사용합니다. 주소 뒤에 `/auth`나 다른 경로를 붙이지 않습니다.
 
 ```powershell
-npm run configure -- --site-url https://실제프로젝트이름.pages.dev
+npm.cmd run configure -- --site-url https://night-library-394.pages.dev
 ```
 
 이 값은 `wrangler.json`의 `vars.APP_URL`에 들어가며, 로그인 콜백 주소와 공개 페이지의 canonical·sitemap 생성에 사용됩니다. 도메인을 바꾸면 이 값과 Google의 허용 주소를 함께 바꿉니다.
@@ -135,10 +141,10 @@ https://console.cloud.google.com/ 에서 진행합니다.
 6. Authorized redirect URIs에 다음을 입력합니다.
 
 ```text
-https://실제프로젝트이름.pages.dev/auth/callback
+https://night-library-394.pages.dev/auth/callback
 ```
 
-JavaScript origin을 요구하면 `https://실제프로젝트이름.pages.dev`를 입력합니다. OAuth 콜백 주소는 프로토콜·호스트·경로까지 정확히 일치해야 합니다.
+JavaScript origin을 요구하면 `https://night-library-394.pages.dev`를 입력합니다. OAuth 콜백 주소는 프로토콜·호스트·경로까지 정확히 일치해야 합니다. 홈페이지는 `https://night-library-394.pages.dev/`, 개인정보 안내는 `https://night-library-394.pages.dev/privacy/`입니다.
 
 7. 발급된 Client ID와 Client secret을 보관합니다. Client secret은 Google 화면과 본인 Cloudflare 설정에서만 취급합니다.
 8. 일반 방문자에게 공개하기 전에는 Google Audience에서 앱의 공개 상태를 확인합니다. 추가 도메인 확인·검증 안내가 나오면 Google 화면의 요구사항을 완료합니다. 테스트 사용자만 등록한 상태로 전체 사용자에게 공개하지 않습니다.
@@ -148,7 +154,7 @@ JavaScript origin을 요구하면 `https://실제프로젝트이름.pages.dev`�
 Client ID는 비밀이 아니므로 다음처럼 설정합니다.
 
 ```powershell
-npm run configure -- --google-client-id 실제클라이언트ID.apps.googleusercontent.com
+npm.cmd run configure -- --google-client-id 실제클라이언트ID.apps.googleusercontent.com
 ```
 
 Pages 프로젝트의 **Settings → Variables and Secrets**에서 **Production**에 아래 두 값을 암호화된 Secret으로 추가합니다.
@@ -184,7 +190,7 @@ GitHub에 올리면 Pages가 자동 재배포합니다. 이후 수정도 `git ad
 6. 로그아웃 후 다른 Google 계정으로 접속해 앞 계정의 기록이 보이지 않는지 확인합니다.
 7. 휴대전화에서도 입력창과 단어장 메뉴를 확인합니다.
 
-자동 검사는 실제 SQLite에서 데이터 격리·저장과 OAuth 상태/서명/세션 처리를 검증합니다. Cloudflare의 workerd 실행기에서도 컴파일한 Pages Functions와 D1을 연결해 저장·세션·로그아웃 동작을 확인했습니다. 자동 브라우저 환경의 접근 제한으로 이번 배포판의 브라우저 시각 검증은 완료하지 못했습니다. 본인 Google 계정으로 하는 실제 로그인, 실제 Cloudflare 배포 및 무료 플랜 CPU 사용량 확인은 이 설정 후 별도로 진행해야 합니다.
+자동 검사는 실제 SQLite에서 데이터 격리·저장과 OAuth 상태/서명/세션 처리를 검증합니다. 로컬 Cloudflare workerd 실행기에서도 컴파일한 Pages Functions와 D1을 연결해 저장·세션·로그아웃 동작을 확인했습니다. 실제 Cloudflare Pages 배포는 GitHub 배포 검사와 운영 주소의 HTTP 응답으로 확인했습니다. 자동 브라우저 환경의 접근 제한으로 브라우저 시각 검증은 완료하지 못했습니다. 본인 Google 계정으로 하는 실제 로그인·운영 D1 저장과 무료 플랜 CPU 사용량은 로그인 설정 후 확인해야 합니다.
 
 미리보기 브랜치에는 운영 Secret을 복사하지 마세요. 앱은 `APP_URL`과 다른 호스트에서 계정 로그인을 거부하도록 구성했습니다. Pages의 Branch deployment controls에서 불필요한 preview 자동 배포를 꺼도 됩니다.
 

@@ -10,7 +10,12 @@
 - 로컬 D1 마이그레이션 3개 적용 통과.
 - 개인 키와 기존 호스팅의 인증 의존성이 클라이언트 번들에 포함되지 않는지 검사.
 - 기존 공개 Sites의 소스는 수정하지 않음. 이 프로젝트는 별도 외부 배포판.
+- GitHub의 Cloudflare Pages 배포 검사 성공을 확인.
+- 운영 주소 `https://night-library-394.pages.dev/`와 `/privacy/`의 HTTP 200 응답과 페이지 제목을 확인.
+- 운영 `/api/health`에서 `ok: true`, `storageConfigured: true`를 확인. 이는 D1 바인딩 존재 확인이며 실제 테이블 조회·저장 검증은 아님.
+- Google 연결 전 `/api/session`이 `user: null`, `loginAvailable: false`를 반환함을 확인.
+- 배포별 미리보기 주소에는 `X-Robots-Tag: noindex`가 있고 고정 운영 주소에는 해당 헤더가 없음을 확인.
 
-미완료: 자동 브라우저 환경의 접근 제한으로 시각 검증을 마치지 못함. 본인 계정의 실제 Google 로그인, 본인 Cloudflare 계정의 공개 배포, 실제 무료 플랜 CPU 사용량, 부하 시험, AdSense 심사 결과는 미검증.
+미완료: 자동 브라우저 환경의 접근 제한으로 시각 검증을 마치지 못함. 본인 계정의 실제 Google 로그인과 운영 D1 저장, 실제 무료 플랜 CPU 사용량, 부하 시험, AdSense 심사 결과는 미검증.
 
-비밀 키는 포함하지 않음. 전달받은 실제 D1 Database ID를 `wrangler.json`에 반영함. 사이트 URL·Google Client ID는 실제 Pages 주소와 OAuth 클라이언트가 발급된 후 설정해야 함. 원격 D1 마이그레이션은 아직 실행하지 않음. 기존 Sites의 학습 기록은 자동 이전되지 않음.
+비밀 키는 포함하지 않음. 전달받은 실제 D1 Database ID와 확인한 고정 운영 주소를 `wrangler.json`에 반영함. Google Client ID와 Production Secret 2개는 추가 설정이 필요함. 원격 D1 마이그레이션 적용 여부는 아직 검증하지 않음. 기존 Sites의 학습 기록은 자동 이전되지 않음.
