@@ -21,3 +21,97 @@
 .en-resource-links a{display:inline-flex;align-items:center;gap:6px;color:var(--primary);text-decoration:none;text-underline-offset:4px}
 .en-resource-links a:hover{text-decoration:underline}
 @media(max-width:640px){.en-resource-links{gap:12px 20px;margin:0 0 23px;font-size:11px}}
+
+/* Screen preference and a compact, touch-friendly study flow. */
+.english-app [hidden]{display:none!important}
+.en-screen-settings{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;margin:0 0 26px;font-size:12px;color:var(--muted-foreground)}
+.en-screen-settings label{display:inline-flex;align-items:center;gap:7px;color:var(--foreground);font-weight:600}
+.en-screen-settings select{font:inherit;color:var(--foreground);background:var(--card);border:1px solid var(--border);border-radius:7px;min-height:44px;padding:9px 30px 9px 12px;max-width:100%}
+.en-screen-settings select:focus-visible{outline:3px solid #6990eb;outline-offset:3px}
+.en-screen-settings>span{margin-left:auto;font-size:11px}
+.en-lesson-chooser{border:1px solid var(--border);border-radius:10px;background:var(--card);margin-bottom:22px;min-width:0}
+.en-current-lesson{display:flex;align-items:center;gap:16px;padding:17px 20px}
+.en-current-number{flex-shrink:0;font:23px Georgia,serif;color:var(--primary)}
+.en-current-number small{font:11px Arial,sans-serif;color:var(--muted-foreground)}
+.en-current-lesson>div{min-width:0;flex:1}
+.en-current-lesson>div>small{color:var(--muted-foreground);font-size:11px}
+.en-current-lesson p{font-size:15px;font-weight:600;line-height:1.65;margin:4px 0 0;overflow-wrap:anywhere}
+.en-current-lesson>button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0;border:1px solid var(--border);border-radius:7px;min-height:44px;padding:9px 12px;background:var(--card);color:var(--primary);font-size:12px;white-space:nowrap}
+.en-current-lesson>button[aria-expanded=true] svg{transform:rotate(180deg)}
+.en-lesson-chooser .en-lesson-picker{margin:0;padding:12px;border-top:1px solid var(--border);max-height:370px;overflow-y:auto;overscroll-behavior:contain}
+.en-study-workspace{min-width:0;scroll-margin-top:12px}
+.en-study-grid>*{min-width:0}
+.en-practice-panel{display:flex;flex-direction:column;gap:18px;min-width:0}
+.en-feedback{scroll-margin-top:80px}
+.en-study-tabs{display:flex;gap:6px;position:sticky;top:0;z-index:15;background:var(--background);padding:8px 0 12px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.en-study-tabs>button{display:flex;align-items:center;justify-content:center;gap:5px;flex:1;min-width:0;min-height:46px;padding:10px 6px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted-foreground);font-size:13px;font-weight:600;white-space:nowrap}
+.en-study-tabs>button[aria-selected=true]{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground)}
+.en-study-tabs svg{flex-shrink:0}
+.en-start-practice{width:100%;margin-top:22px}
+.english-app[data-compact=true] .en-main{max-width:680px;padding-bottom:calc(45px + env(safe-area-inset-bottom,0px))}
+.english-app[data-compact=true] .en-intro{margin-top:0;margin-bottom:24px}
+.english-app[data-compact=true] .en-intro-note{display:none}
+.english-app[data-compact=true] .en-screen-settings>span{display:none}
+.english-app[data-compact=true] .en-screen-settings select{font-size:16px}
+.english-app[data-compact=true] .en-header nav button,.english-app[data-compact=true] .brand,.english-app[data-compact=true] .login-link{min-height:44px}
+.english-app[data-compact=true] .login-link{display:inline-flex;align-items:center}
+.english-app[data-compact=true] .en-study-grid{display:block}
+.english-app[data-compact=true] .en-lesson-picker{grid-template-columns:1fr;gap:8px}
+.english-app[data-compact=true] .en-current-lesson{flex-wrap:wrap;gap:10px 13px;padding:16px}
+.english-app[data-compact=true] .en-current-lesson>div{flex-basis:calc(100% - 80px)}
+.english-app[data-compact=true] .en-current-lesson>button{width:100%}
+.english-app[data-compact=true] .en-paper{padding:25px 22px}
+.english-app[data-compact=true] .en-paper h2{font-size:32px;overflow-wrap:anywhere}
+.english-app[data-compact=true] .en-paper-top{flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.english-app[data-compact=true] .en-paper-top>span:last-child{font-size:11px}
+.english-app[data-compact=true] .en-read-tip{font-size:12px;align-items:flex-start;line-height:1.8}
+.english-app[data-compact=true] .en-read-tip svg{flex-shrink:0;margin-top:3px}
+.english-app[data-compact=true] .en-paragraphs>section{padding:14px 10px;margin:0 -10px}
+.english-app[data-compact=true] .en-paragraphs p{font-size:18px;line-height:1.95;overflow-wrap:anywhere}
+.english-app[data-compact=true] .en-paragraph-index{position:static;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:auto;min-width:72px;min-height:44px;margin-bottom:8px;padding:8px 12px;border:1px solid var(--border);background:var(--card);font-size:12px!important}
+.english-app[data-compact=true] .en-paragraph-index::after{content:'해석'}
+.english-app[data-compact=true] .en-practice,.english-app[data-compact=true] .en-session-card,.english-app[data-compact=true] .en-vocab-panel{padding:22px 20px}
+.english-app[data-compact=true] .en-part-tabs{gap:7px}
+.english-app[data-compact=true] .en-part-tabs>button{width:44px;height:44px;font-size:14px}
+.english-app[data-compact=true] .en-active-source{max-height:none;padding:15px}
+.english-app[data-compact=true] .en-active-source p{font-size:17px}
+.english-app[data-compact=true] .en-translation{font-size:16px;min-height:210px;padding:13px}
+.english-app[data-compact=true] .en-input-label{font-size:13px;line-height:1.8}
+.english-app[data-compact=true] .en-input-bottom{flex-wrap:wrap}
+.english-app[data-compact=true] .en-input-bottom>span{flex-basis:100%;font-size:11px}
+.english-app[data-compact=true] .en-input-bottom>button{flex:1}
+.english-app[data-compact=true] .button{min-height:46px;font-size:13px}
+.english-app[data-compact=true] .en-link,.english-app[data-compact=true] .en-custom-add{min-height:44px;font-size:12px!important}
+.english-app[data-compact=true] .en-part-navigation>button{min-height:44px;font-size:13px}
+.english-app[data-compact=true] .en-part-navigation{padding-top:12px;gap:8px}
+.english-app[data-compact=true] .en-feedback{font-size:15px}
+.english-app[data-compact=true] .en-feedback-note{font-size:13px}
+.english-app[data-compact=true] .en-feedback-bottom{flex-wrap:wrap;align-items:center;font-size:12px}
+.english-app[data-compact=true] .en-vocab-row>button{width:44px;height:44px}
+.english-app[data-compact=true] .en-vocab-row>div{min-width:0;overflow-wrap:anywhere}
+.english-app[data-compact=true] .en-vocab-row p,.english-app[data-compact=true] .en-vocab-row small{font-size:14px;line-height:1.9}
+.english-app[data-compact=true] .en-word-grid{grid-template-columns:1fr}
+.english-app[data-compact=true] .en-search{min-width:0;flex-basis:100%;min-height:46px}
+.english-app[data-compact=true] .en-search input,.english-app[data-compact=true] .en-dialog input,.english-app[data-compact=true] .en-dialog textarea{font-size:16px}
+.english-app[data-compact=true] .en-filter{flex-wrap:wrap}
+.english-app[data-compact=true] .en-filter>button,.english-app[data-compact=true] .en-mastery{min-height:44px}
+.english-app[data-compact=true] .icon-button{min-width:44px;min-height:44px}
+.english-app[data-compact=true] .en-history-stats{gap:8px}
+.english-app[data-compact=true] .en-history-stats>div{padding:16px 12px;flex-wrap:wrap;gap:8px}
+.english-app[data-compact=true] .en-history-stats span{flex-basis:100%;margin-left:0;font-size:11px}
+.english-app[data-compact=true] .en-history-list h2{overflow-wrap:anywhere}
+.english-app[data-compact=true] .en-dialog{padding:22px;max-height:calc(100dvh - 32px);padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+.english-app[data-compact=true][data-large=true] .en-paragraphs p{font-size:21px}
+.english-app[data-compact=true][data-large=true] .en-active-source p{font-size:20px}
+.english-app[data-compact=true][data-large=true] .en-translation,.english-app[data-compact=true][data-large=true] .en-feedback{font-size:18px}
+@media(max-width:420px){
+ .en-header{gap:10px;padding:14px 15px}
+ .en-header-tools{gap:2px}
+ .en-header .brand{font-size:17px;gap:7px}
+ .en-header .brand-mark{width:30px;height:30px}
+ .en-screen-settings{column-gap:9px}
+ .en-screen-settings select{font-size:14px}
+ .english-app[data-compact=true] .en-paper,.english-app[data-compact=true] .en-practice,.english-app[data-compact=true] .en-vocab-panel{padding-left:18px;padding-right:18px}
+ .english-app[data-compact=true] .en-paper h2{font-size:29px}
+ .english-app[data-compact=true] .en-history-stats svg{display:none}
+}

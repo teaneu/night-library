@@ -61,6 +61,11 @@
 .related-reading>h2{font-size:1.2rem;margin-bottom:22px}
 .related-reading .reading-cards{grid-template-columns:1fr}
 .related-reading .reading-card{padding:23px 26px}
+@media(max-width:800px){
+ .public-nav a,.footer nav a{display:inline-flex;align-items:center;min-height:44px}
+ .reading-explanation summary{min-height:44px}
+ .reading-table-wrap{overscroll-behavior-x:contain}
+}
 @media(max-width:640px){
  .reading-heading h1{font-size:1.9rem}
  .reading-heading>p:last-of-type{font-size:.9rem}
