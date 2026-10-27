@@ -1,1 +1,239 @@
-# night-library
+# 밤의 서재 — GitHub + Cloudflare 배포 안내
+
+2026년 10월 28일 기준. 이 프로젝트는 기존 사이트에서 영어 읽기·참고 해설·단어장·학습 기록 기능을 가져온 **외부 배포용 소스**입니다. 실제 AI 자동 첨삭과 광고 스크립트는 연결하지 않았습니다.
+
+## 구성
+
+- GitHub: 소스 코드와 학습용 글을 보관합니다. 방문자의 학습 기록은 GitHub에 올리지 않습니다.
+- Cloudflare Pages: 빌드 시 생성한 HTML·CSS·JavaScript를 제공합니다. 첫 화면과 공개 글은 JavaScript 실행 전에도 본문이 보입니다.
+- Pages Functions: `/api/*`, `/auth/*` 요청만 처리합니다. Workers 기반으로 실행되며 Workers 무료 한도를 공유합니다.
+- Cloudflare D1: 사용자별 해석·단어장·학습 기록과 로그인 세션을 보관합니다.
+- Google 로그인: 이메일·프로필을 확인합니다. Google 비밀번호는 사이트에서 받지 않습니다.
+
+Pages를 선택한 이유는 무료 `프로젝트이름.pages.dev` 주소와 GitHub 자동 배포를 함께 사용하기 위해서입니다. Workers에 사이트 전체를 매번 서버 렌더링하는 방식 대신, 읽기 화면을 정적으로 제공합니다.
+
+저장소: https://github.com/teaneu/night-library
+
+Cloudflare D1 `night-library-db`는 이미 생성했으며 전달받은 Database ID를 `wrangler.json`에 반영했습니다. 원격 테이블 생성, Pages 프로젝트 배포, Google 로그인 연결은 아래 순서로 진행합니다. 이전 Sites 배포는 별개의 사이트이며 그대로 남습니다.
+
+## 1. 컴퓨터에서 실행 준비
+
+Windows에서 Node.js 24 LTS를 설치합니다. Git 명령으로 소스를 관리하려면 Git도 설치합니다.
+
+- Node.js: https://nodejs.org/
+- Git: https://git-scm.com/downloads
+- GitHub: https://github.com/
+- Cloudflare: https://dash.cloudflare.com/
+
+GitHub 저장소에서 **Code → Download ZIP**으로 최신 소스를 내려받아 압축을 풉니다. `package.json`이 있는 폴더에서 PowerShell을 엽니다. 또는 Git이 설치되어 있다면 아래 명령으로 복제합니다.
+
+```powershell
+git clone https://github.com/teaneu/night-library.git
+cd night-library
+```
+
+```powershell
+npm ci
+npm run check
+npm run build
+npm test
+```
+
+`npm ci`는 설치, `check`는 타입 검사, `build`는 정적 화면 생성, `test`는 로그인·저장·사용자 격리 검사입니다. 테스트는 빌드 결과도 검사하므로 먼저 `build`를 실행합니다.
+
+로컬 미리보기는 다음 명령을 순서대로 실행합니다.
+
+```powershell
+npm run db:local
+npm run preview
+```
+
+터미널에 표시된 주소를 엽니다. Google 로그인 설정 전에도 읽기·해석·해설 확인은 가능합니다. 로그인과 계정 저장은 아래 설정 후 열립니다. 미리보기 종료는 `Ctrl+C`입니다.
+
+## 2. 이미 만든 D1에 테이블 생성
+
+`night-library-db`를 다시 만들 필요는 없습니다. Database ID가 소스에 반영되어 있으므로 다음 명령을 실행합니다.
+
+```powershell
+npx wrangler login
+npm run db:migrate
+```
+
+브라우저에서 D1을 만든 본인 Cloudflare 계정으로 로그인하고, Wrangler의 계정 접근을 승인합니다. 여러 Cloudflare 계정이 나오면 해당 DB가 있는 계정을 선택합니다.
+
+`db:migrate`는 원격 D1에 `migrations` 폴더의 테이블을 생성합니다. 기존 테이블을 지우는 명령은 포함하지 않았습니다. 앞으로 DB 구조를 바꾸면 새 SQL 파일을 추가하고 이 명령을 다시 실행합니다. 소스 코드만 배포한다고 DB 변경이 자동 적용되지는 않습니다.
+
+DB의 ID와 이름은 `wrangler.json`에 보관합니다. **D1 바인딩 이름은 대문자 `DB`**여야 합니다.
+
+## 3. GitHub 소스와 자동 검사
+
+소스는 `teaneu/night-library`의 `main` 브랜치에서 관리합니다. 기존 저장소를 다시 만들거나 `git init`을 실행할 필요는 없습니다. 현재 저장소는 공개이므로 누구나 소스를 읽을 수 있습니다. 실제 비밀 키와 이용자의 기록은 저장소에 올리지 않습니다.
+
+이후 소스 수정은 연결된 GitHub 도구로 반영하거나, Git으로 복제한 폴더에서 수정한 뒤 커밋·푸시합니다. ZIP으로 내려받은 폴더에는 Git 이력이 없으므로 직접 푸시하려면 먼저 위의 `git clone`으로 복제합니다.
+
+`.gitignore`에 `node_modules`, 빌드 출력, `.dev.vars`, `.env`, Wrangler 로컬 DB 등이 제외돼 있습니다. 실제 비밀 키는 이 프로젝트의 파일에 넣지 않습니다.
+
+GitHub의 Actions에는 기본 검사가 포함돼 있습니다. 이 검사는 Cloudflare에 배포하지 않으며, Cloudflare의 Git 연결이 배포를 담당합니다.
+
+## 4. Cloudflare Pages와 GitHub 연결
+
+Cloudflare 대시보드에서 다음 순서로 진행합니다. 화면에 표시되는 메뉴 이름은 언어와 업데이트에 따라 조금 다를 수 있습니다.
+
+1. **Workers & Pages → Create application → Pages → Connect to Git**로 이동합니다. Workers 생성 화면만 보이면 Pages 시작 옵션을 선택합니다.
+2. GitHub를 연결하고, 방금 만든 저장소에 대한 접근을 허용합니다.
+3. `teaneu/night-library` 저장소를 선택합니다. ChatGPT에 연결한 GitHub 권한과 Cloudflare의 GitHub 연결 권한은 별개입니다.
+4. 아래 빌드 설정을 입력합니다.
+
+| 항목 | 값 |
+| --- | --- |
+| Project name | `night-library` 또는 사용 가능한 원하는 이름 |
+| Production branch | `main` |
+| Framework preset | `None` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Root directory | 저장소 맨 위면 비워 둠 |
+| 빌드 환경 변수 `NODE_VERSION` | `24` |
+
+5. **Save and Deploy**를 누릅니다.
+6. 완료 후 Cloudflare가 표시하는 **실제 운영 주소**를 복사합니다. 일반적으로 `https://프로젝트이름.pages.dev` 형식입니다. 임의로 추측한 주소를 사용하지 않습니다.
+
+프로젝트 이름을 `night-library`와 다르게 만들었다면 로컬 설정도 맞춥니다.
+
+```powershell
+npm run configure -- --name 실제프로젝트이름
+```
+
+처음에는 로그인 설정이 없어 읽기 화면만 열리는 것이 정상입니다. 기본 페이지에서 "로그인·저장 기능은 운영자의 연결 설정 후 열립니다"라는 안내가 나옵니다.
+
+### D1 연결 확인
+
+`wrangler.json`에 실제 DB ID를 입력한 상태로 올리면 코드에 정의된 D1 바인딩을 사용합니다. Pages 설정의 Bindings에서 `DB`가 본인의 `night-library-db`에 연결되어 있는지도 확인합니다. 아직 바인딩이 보이지 않으면 Production 환경의 D1 바인딩을 추가하고 재배포합니다. 같은 DB를 새로 만들 필요는 없습니다.
+
+## 5. Google 로그인 연결
+
+기존 사이트의 ChatGPT 로그인은 이전 호스팅이 제공하던 기능입니다. 이 배포판은 별도의 Google 로그인 계정을 사용하며, 이전 계정의 학습 기록이 자동으로 합쳐지지는 않습니다.
+
+### 5-1. 실제 사이트 주소 설정
+
+아래의 URL을 Cloudflare가 알려 준 **실제 운영 주소**로 바꿉니다. 주소 뒤에 `/auth`나 다른 경로를 붙이지 않습니다.
+
+```powershell
+npm run configure -- --site-url https://실제프로젝트이름.pages.dev
+```
+
+이 값은 `wrangler.json`의 `vars.APP_URL`에 들어가며, 로그인 콜백 주소와 공개 페이지의 canonical·sitemap 생성에 사용됩니다. 도메인을 바꾸면 이 값과 Google의 허용 주소를 함께 바꿉니다.
+
+### 5-2. Google OAuth 클라이언트 만들기
+
+https://console.cloud.google.com/ 에서 진행합니다.
+
+1. 새 프로젝트를 만들거나 본인 프로젝트를 선택합니다.
+2. **Google Auth Platform**에서 Branding·Audience·Data Access 설정을 진행합니다. 앱 이름은 `밤의 서재`, 지원 이메일은 본인 이메일로 입력합니다.
+3. 개인 Google 계정으로 누구나 로그인하게 하려면 Audience는 **External**을 사용합니다. 테스트 중에는 본인 계정을 Test users에 넣습니다.
+4. 로그인에 필요한 범위는 `openid`, `email`, `profile`입니다. Drive·Gmail 등 추가 권한은 필요 없습니다.
+5. **Clients → Create client → Web application**을 만듭니다.
+6. Authorized redirect URIs에 다음을 입력합니다.
+
+```text
+https://실제프로젝트이름.pages.dev/auth/callback
+```
+
+JavaScript origin을 요구하면 `https://실제프로젝트이름.pages.dev`를 입력합니다. OAuth 콜백 주소는 프로토콜·호스트·경로까지 정확히 일치해야 합니다.
+
+7. 발급된 Client ID와 Client secret을 보관합니다. Client secret은 Google 화면과 본인 Cloudflare 설정에서만 취급합니다.
+8. 일반 방문자에게 공개하기 전에는 Google Audience에서 앱의 공개 상태를 확인합니다. 추가 도메인 확인·검증 안내가 나오면 Google 화면의 요구사항을 완료합니다. 테스트 사용자만 등록한 상태로 전체 사용자에게 공개하지 않습니다.
+
+### 5-3. 공개 설정과 비밀 키 등록
+
+Client ID는 비밀이 아니므로 다음처럼 설정합니다.
+
+```powershell
+npm run configure -- --google-client-id 실제클라이언트ID.apps.googleusercontent.com
+```
+
+Pages 프로젝트의 **Settings → Variables and Secrets**에서 **Production**에 아래 두 값을 암호화된 Secret으로 추가합니다.
+
+| 이름 | 값 |
+| --- | --- |
+| `GOOGLE_CLIENT_SECRET` | Google에서 발급한 Client secret |
+| `SESSION_SECRET` | 본인 컴퓨터에서 생성한 충분히 긴 임의 값 |
+
+`SESSION_SECRET`은 아래 명령으로 컴퓨터에서 직접 생성할 수 있습니다. 출력은 본인 Cloudflare Secret 입력에만 사용하고 GitHub·대화창에 올리지 않습니다.
+
+```powershell
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+```
+
+`APP_URL`과 `GOOGLE_CLIENT_ID`의 원본은 `wrangler.json`입니다. 이 두 값은 파일에서 관리하고, 위의 비밀 키 두 개만 Cloudflare Secret으로 관리합니다. Secret을 설정한 뒤 새 배포를 해야 적용됩니다.
+
+```powershell
+git add wrangler.json
+git commit -m "Configure site URL and Google sign-in"
+git push
+```
+
+GitHub에 올리면 Pages가 자동 재배포합니다. 이후 수정도 `git add`, `git commit`, `git push`로 진행합니다.
+
+## 6. 공개 전에 동작 확인
+
+1. 로그아웃 상태에서 원문·해석 입력·참고 해설이 보이는지 확인합니다.
+2. `/about/`, `/privacy/`가 열리는지 확인합니다.
+3. `/api/session`에서 `loginAvailable: true`가 나오는지 확인합니다. 로그인 전 `user: null`은 정상입니다.
+4. Google 로그인 후 해석을 쓰고 **기록 저장**을 누릅니다.
+5. 단어 한 개를 저장하고 새로고침한 뒤 유지되는지 확인합니다.
+6. 로그아웃 후 다른 Google 계정으로 접속해 앞 계정의 기록이 보이지 않는지 확인합니다.
+7. 휴대전화에서도 입력창과 단어장 메뉴를 확인합니다.
+
+자동 검사는 실제 SQLite에서 데이터 격리·저장과 OAuth 상태/서명/세션 처리를 검증합니다. Cloudflare의 workerd 실행기에서도 컴파일한 Pages Functions와 D1을 연결해 저장·세션·로그아웃 동작을 확인했습니다. 자동 브라우저 환경의 접근 제한으로 이번 배포판의 브라우저 시각 검증은 완료하지 못했습니다. 본인 Google 계정으로 하는 실제 로그인, 실제 Cloudflare 배포 및 무료 플랜 CPU 사용량 확인은 이 설정 후 별도로 진행해야 합니다.
+
+미리보기 브랜치에는 운영 Secret을 복사하지 마세요. 앱은 `APP_URL`과 다른 호스트에서 계정 로그인을 거부하도록 구성했습니다. Pages의 Branch deployment controls에서 불필요한 preview 자동 배포를 꺼도 됩니다.
+
+## 7. 무료 한도와 비용 관리
+
+- Pages 정적 파일 요청은 무료·무제한입니다. API·로그인용 Functions는 Workers의 하루 100,000 요청, 요청당 CPU 10ms 무료 한도를 공유합니다. 방문자 100,000명이라는 뜻은 아닙니다.
+- D1 무료 한도는 하루 5,000,000행 읽기·100,000행 쓰기입니다. 저장 공간·DB별 크기에도 별도 제한이 있습니다.
+- 무료 한도를 넘으면 해당 API·DB 작업이 제한될 수 있습니다. 자동으로 유료 플랜을 켜는 코드는 없습니다. Cloudflare 대시보드에서 Workers Free 사용 여부를 확인합니다.
+- 로그인 시의 암호 검증도 무료 CPU 한도에 들어갑니다. 화면을 정적으로 만들어 실행량을 줄였지만 실제 운영의 CPU 한도 충족을 미리 보장하지는 않습니다. 배포 후 Analytics에서 오류와 CPU 사용량을 확인합니다.
+- Pages의 **Settings → Runtime → Fail open / closed**는 로그인·API에 대해 **Fail closed**를 선택하는 것이 안전합니다. 개인 기록을 정적 공개 파일로 저장하지 않습니다.
+- 사이트 코드에 외부 AI API 호출은 없으므로 AI 첨삭 토큰 비용은 없습니다.
+- 개인 도메인을 구매하면 도메인 등록·갱신 비용은 호스팅과 별도입니다. 무료 기본 주소로 먼저 운영할 수 있습니다.
+
+## 8. 애드센스 신청 준비
+
+아직 게시자 ID를 받지 않았으므로 실제 광고 스크립트를 넣지 않았습니다. 승인을 보장하는 코드나 문구는 없습니다.
+
+계정에서 사이트를 추가할 때 먼저 **실제 Pages 운영 주소**를 입력합니다. Google의 주소 인정·정책 검토 결과를 확인합니다. 별도 개인 도메인을 쓰면 그 도메인으로 신청합니다.
+
+Google이 "메타 태그" 확인 방법을 제공하면, Pages의 **빌드 환경 변수** `ADSENSE_PUBLISHER_ID`에 본인의 `ca-pub-숫자16자리` 값을 넣고 재배포할 수 있습니다. 빌드가 `<meta name="google-adsense-account" ...>`만 추가합니다. 광고를 자동으로 켜는 기능은 아닙니다.
+
+실제 광고를 게재할 때는 계정에서 받은 광고 스크립트와 필요한 `ads.txt`, 쿠키/동의 설정, 개인정보 안내를 함께 적용해야 합니다. 개인 해석·단어장·학습 기록 화면의 광고 배치는 별도 검토합니다. 현재 공개 학습 글은 두 편이므로 원문·해설의 충실도와 콘텐츠 양도 더 보강하는 것이 좋습니다. 특정 글 개수만 채우면 승인된다는 기준은 없습니다.
+
+## 9. 글 추가와 기존 기록
+
+- 본문·참고 번역·단어: `src/articles.ts`
+- 문단별 해설: `src/english-lessons.ts`
+- 영어 글을 추가할 때 원문·번역·해설의 문단 수를 맞춥니다. `npm run build`와 `npm test`로 확인하고 GitHub에 올립니다.
+- 기존 Sites에서 저장했던 기록은 이 DB로 자동 이전되지 않습니다. 기존 사이트의 학습 기록 내보내기로 본인 기록을 백업할 수 있습니다. 새 사이트에는 전체 해석 붙여넣기를 이용해 필요한 내용을 저장할 수 있습니다. 다른 이용자의 계정·기록을 임의로 합치지 않습니다.
+
+## 문제 해결
+
+| 증상 | 확인할 곳 |
+| --- | --- |
+| 로그인 연결 준비 안내 | APP_URL, Client ID, Production Secret 2개, D1 연결, 재배포 여부 |
+| `redirect_uri_mismatch` | Google에 등록한 주소와 실제 `/auth/callback` 주소의 완전 일치 |
+| 본인만 로그인 가능 | Google Audience의 테스트 사용자·공개 상태 |
+| 로그인 후 기록을 불러오지 못함 | `npm run db:migrate` 실행 여부, D1 바인딩 이름 `DB`, Pages Functions 로그 |
+| Cloudflare 빌드 실패 | Node 24, `npm run build`, 출력 `dist`, 실제 DB ID, package-lock.json 포함 여부 |
+| 첫 화면이 안 뜸 | Pages 프로젝트로 만들었는지, `package.json`이 저장소 최상위에 있는지 |
+| 도메인 변경 후 로그인 실패 | APP_URL, Google redirect URI, 재배포. 기존 호스트의 쿠키는 새 호스트로 이동하지 않음 |
+
+## 공식 참고 자료
+
+- Pages Git 배포: https://developers.cloudflare.com/pages/get-started/git-integration/
+- API만 Functions로 실행: https://developers.cloudflare.com/pages/functions/routing/
+- Pages 설정과 바인딩: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+- D1 마이그레이션: https://developers.cloudflare.com/d1/reference/migrations/
+- Google 로그인: https://developers.google.com/identity/openid-connect/openid-connect
+- Workers 가격: https://developers.cloudflare.com/workers/platform/pricing/
+- D1 가격: https://developers.cloudflare.com/d1/platform/pricing/
+- 애드센스 사이트 연결: https://support.google.com/adsense/answer/7584263?hl=ko

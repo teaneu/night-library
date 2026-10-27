@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "night-library",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-05-15",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "night-library-db",
+      "database_id": "6be24d66-5bdd-4bc5-aeb5-1d338349a5b2",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "APP_URL": "",
+    "GOOGLE_CLIENT_ID": ""
+  }
+}

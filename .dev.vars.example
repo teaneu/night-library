@@ -1,0 +1,5 @@
+# 로컬 테스트 전용. 실제 값이 들어간 .dev.vars는 GitHub에 올리지 않습니다.
+APP_URL=http://localhost:8787
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+SESSION_SECRET=
