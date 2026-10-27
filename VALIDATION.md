@@ -18,4 +18,4 @@
 
 미완료: 자동 브라우저 환경의 접근 제한으로 시각 검증을 마치지 못함. 본인 계정의 실제 Google 로그인과 운영 D1 저장, 실제 무료 플랜 CPU 사용량, 부하 시험, AdSense 심사 결과는 미검증.
 
-비밀 키는 포함하지 않음. 전달받은 실제 D1 Database ID와 확인한 고정 운영 주소를 `wrangler.json`에 반영함. Google Client ID와 Production Secret 2개는 추가 설정이 필요함. 원격 D1 마이그레이션 적용 여부는 아직 검증하지 않음. 기존 Sites의 학습 기록은 자동 이전되지 않음.
+비밀 키는 포함하지 않음. 전달받은 실제 D1 Database ID, 확인한 고정 운영 주소와 Google Client ID를 `wrangler.json`에 반영함. 사용자 제공 Cloudflare 화면에서 로그인용 Secret 두 개가 암호화되어 등록된 표시를 확인함. Secret 값과 Google 클라이언트의 유효성은 실제 로그인으로 검증해야 함. 원격 D1 마이그레이션 적용 여부는 아직 검증하지 않음. 기존 Sites의 학습 기록은 자동 이전되지 않음.
