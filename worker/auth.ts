@@ -5,7 +5,7 @@ const encoder=new TextEncoder();
 const googleKeys=createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'));
 const SESSION_SECONDS=60*60*24*30;
 type Flow={state:string;verifier:string;nonce:string};
-const privateHeaders={'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
+const privateHeaders={'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
 export const json=(data:unknown,status=200)=>Response.json(data,{status,headers:privateHeaders});
 
 export function appOrigin(env:Env):string|null{

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
-import {readFileSync,readdirSync,mkdirSync} from 'node:fs';
+import {readFileSync,readdirSync,mkdirSync,existsSync} from 'node:fs';
 import {build} from 'esbuild';
 import {SignJWT,generateKeyPair,exportJWK,createLocalJWKSet} from 'jose';
 
@@ -130,4 +130,45 @@ test('static output contains crawlable lesson text and does not bundle credentia
   const routes=JSON.parse(readFileSync('dist/_routes.json','utf8'));assert.deepEqual(routes.include,['/api/*','/auth/*']);
   for(const file of readdirSync('dist/assets').filter(f=>f.endsWith('.js'))){const js=readFileSync('dist/assets/'+file,'utf8');assert.equal(js.includes('GOOGLE_CLIENT_SECRET'),false);assert.equal(js.includes('SESSION_SECRET'),false);assert.equal(js.includes('signin-with-chatgpt'),false);}
   assert.equal(html.includes('adsbygoogle.js'),false);assert.ok(readFileSync('dist/privacy/index.html','utf8').includes('Google'));
+});
+
+test('public learning pages are discoverable, consistently branded and keep private routes out of indexing',()=>{
+  const origin=JSON.parse(readFileSync('wrangler.json','utf8')).vars.APP_URL;
+  const files=readdirSync('dist',{recursive:true}).filter(f=>f==='index.html'||f.endsWith('/index.html'));
+  const titles=new Set();const descriptions=new Set();
+  for(const file of files){
+    const html=readFileSync('dist/'+file,'utf8');
+    const path=file==='index.html'?'/':'/'+file.slice(0,-'index.html'.length);
+    const title=html.match(/<title>(.*?)<\/title>/s)?.[1];
+    const description=html.match(/<meta name="description" content="([^"]*)"/s)?.[1];
+    assert.ok(title?.includes('잉글담'),file);assert.ok(description?.length>20,file);
+    assert.equal(titles.has(title),false,'duplicate page title');titles.add(title);
+    assert.equal(descriptions.has(description),false,'duplicate page description');descriptions.add(description);
+    assert.equal((html.match(/<h1(?:\s|>)/g)||[]).length,1,file+' needs one main heading');
+    assert.equal(html.includes('밤의 서재'),false,file);
+    assert.equal(html.includes('meta name="keywords"'),false,'avoid keyword stuffing');
+    assert.match(html,/<meta property="og:site_name" content="잉글담"/);
+    if(origin){
+      assert.equal(html.match(/<link rel="canonical" href="([^"]+)"/)?.[1],origin+path);
+      const schema=JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)?.[1]||'null');
+      assert.equal(schema?.['@context'],'https://schema.org');
+      assert.ok(schema['@graph'].some(n=>n.url===origin+path),file);
+      if(path==='/')assert.equal(schema['@graph'].find(n=>n['@type']==='WebSite')?.name,'잉글담');
+    }
+    for(const match of html.matchAll(/<a\b[^>]*href="(\/[^"#]*)"/g)){
+      const url=new URL(match[1],origin||'https://example.test');
+      if(url.pathname.startsWith('/auth/'))continue;
+      assert.ok(existsSync('dist'+url.pathname+(url.pathname.endsWith('/')?'index.html':'')),'broken public link: '+match[1]+' in '+file);
+    }
+  }
+  assert.ok(files.includes('english-reading/index.html'));
+  assert.ok(files.includes('english-reading-guide/index.html'));
+  for(const lesson of englishLessons){
+    const html=readFileSync('dist/read/'+lesson.id+'/index.html','utf8');
+    assert.ok(html.includes(lesson.paragraphs[0]));assert.ok(html.includes(lesson.translation[0]));
+    assert.ok(html.includes('핵심 영어 단어와 예문'));assert.ok(html.includes('참고 해석·구문 해설 보기'));
+  }
+  if(origin){const sitemap=readFileSync('dist/sitemap.xml','utf8');assert.ok(sitemap.includes(origin+'/english-reading/'));assert.ok(sitemap.includes(origin+'/english-reading-guide/'));assert.equal(/\/api\/|\/auth\/|\?/.test(sitemap.replace(/^<\?xml[^>]*>/,'')),false);}
+  const png=readFileSync('dist/social-card.png');assert.equal(png.readUInt32BE(16),1200);assert.equal(png.readUInt32BE(20),630);
+  assert.match(readFileSync('dist/404.html','utf8'),/name="robots" content="noindex"/);
 });

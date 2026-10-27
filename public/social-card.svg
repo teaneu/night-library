@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>Engldam - English reading practice</title>
+  <rect width="1200" height="630" fill="#f3f5ff"/>
+  <circle cx="1095" cy="84" r="235" fill="#e4eaff"/>
+  <circle cx="1165" cy="625" r="250" fill="#e9edff"/>
+  <rect x="64" y="56" width="56" height="56" rx="15" fill="#254ee8"/>
+  <path d="M77 71h10l5 4 5-4h10v25H97l-5 4-5-4H77zM92 75v25" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+  <g font-family="DejaVu Sans" fill="#15213d">
+    <text x="140" y="91" font-size="20" letter-spacing="2" fill="#53617c">ENGLISH READING PRACTICE</text>
+    <text x="64" y="254" font-size="100" font-weight="700" letter-spacing="-5">Engldam</text>
+    <text x="68" y="325" font-size="35" fill="#53617c">Read it. Make it yours.</text>
+    <rect x="68" y="389" width="125" height="53" rx="26" fill="#254ee8"/>
+    <text x="130" y="423" font-size="21" text-anchor="middle" fill="white">Read</text>
+    <rect x="205" y="389" width="165" height="53" rx="26" fill="white" stroke="#d8dff8"/>
+    <text x="287" y="423" font-size="21" text-anchor="middle" fill="#254ee8">Translate</text>
+    <rect x="382" y="389" width="179" height="53" rx="26" fill="white" stroke="#d8dff8"/>
+    <text x="471" y="423" font-size="21" text-anchor="middle" fill="#254ee8">Remember</text>
+    <text x="68" y="563" font-size="16" letter-spacing="2.4" fill="#65708b">ENGLISH TEXTS / TRANSLATION / VOCABULARY</text>
+  </g>
+  <g transform="translate(722 150) rotate(6 160 160)">
+    <rect x="-12" y="10" width="334" height="304" rx="24" fill="#dbe2fd"/>
+    <path d="M0 0h122q36 0 38 28Q162 0 198 0h122v285H198q-36 0-38 25-2-25-38-25H0z" fill="white" stroke="#254ee8" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M160 28v282" stroke="#254ee8" stroke-width="4"/>
+    <path d="M26 60h99M26 87h84M26 114h99M26 141h77M26 168h95M194 60h99M194 87h77M194 114h99M194 141h84" fill="none" stroke="#cdd7fb" stroke-width="9" stroke-linecap="round"/>
+    <rect x="19" y="197" width="113" height="33" rx="8" fill="#e5ebff"/>
+    <path d="M28 213h93" stroke="#254ee8" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="268" cy="231" r="44" fill="#254ee8"/>
+    <path d="m249 232 13 13 25-29" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

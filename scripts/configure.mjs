@@ -1,6 +1,6 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import {parseArgs} from 'node:util';
-const {values}=parseArgs({options:{'database-id':{type:'string'},'site-url':{type:'string'},'google-client-id':{type:'string'},name:{type:'string'}}});
+const {values}=parseArgs({options:{'database-id':{type:'string'},'site-url':{type:'string'},'google-client-id':{type:'string'},'google-site-verification':{type:'string'},'naver-site-verification':{type:'string'},name:{type:'string'}}});
 const config=JSON.parse(readFileSync('wrangler.json','utf8'));
 if(values['database-id']){
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(values['database-id'])||/^0{8}-/.test(values['database-id']))throw Error('실제 D1 database_id를 입력하세요.');
@@ -15,6 +15,12 @@ if(values['google-client-id']){
   if(!values['google-client-id'].endsWith('.apps.googleusercontent.com'))throw Error('Google 웹 애플리케이션 클라이언트 ID를 입력하세요.');
   config.vars.GOOGLE_CLIENT_ID=values['google-client-id'];
 }
-if(values.name){if(!/^[a-z0-9][a-z0-9-]{0,62}$/.test(values.name))throw Error('Worker 이름은 소문자·숫자·하이픈을 사용하세요.');config.name=values.name;}
+for(const [option,key] of [['google-site-verification','GOOGLE_SITE_VERIFICATION'],['naver-site-verification','NAVER_SITE_VERIFICATION']]){
+  const value=values[option];
+  if(value===undefined)continue;
+  if(value&&!/^[A-Za-z0-9_-]{8,256}$/.test(value))throw Error('검색엔진에서 발급받은 실제 확인 코드를 입력하세요.');
+  if(value)config.vars[key]=value;else delete config.vars[key];
+}
+if(values.name){if(!/^[a-z0-9][a-z0-9-]{0,62}$/.test(values.name))throw Error('Pages 프로젝트 이름은 소문자·숫자·하이픈을 사용하세요.');config.name=values.name;}
 writeFileSync('wrangler.json',JSON.stringify(config,null,2)+'\n');
 console.log('wrangler.json을 업데이트했습니다. 비밀 키는 이 파일에 저장하지 마세요.');

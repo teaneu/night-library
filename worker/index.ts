@@ -25,7 +25,7 @@ export default {
       if(request.method!=='GET'&&request.method!=='HEAD')return json({error:'허용되지 않은 요청입니다.'},405);
       return env.ASSETS?env.ASSETS.fetch(request):json({error:'주소를 찾지 못했습니다.'},404);
     }catch{
-      console.error('Night Library request failed:',path);
+      console.error('Engldam request failed:',path);
       return json({error:'요청을 처리하지 못했어요. 작성 중인 내용은 그대로 두고 잠시 뒤 다시 시도해 주세요.'},503);
     }
   },

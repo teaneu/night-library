@@ -1,4 +1,4 @@
-# 밤의 서재 — GitHub + Cloudflare 배포 안내
+# 잉글담 — GitHub + Cloudflare 배포 안내
 
 2026년 10월 28일 기준. 이 프로젝트는 기존 사이트에서 영어 읽기·참고 해설·단어장·학습 기록 기능을 가져온 **외부 배포용 소스**입니다. 실제 AI 자동 첨삭과 광고 스크립트는 연결하지 않았습니다.
 
@@ -16,7 +16,9 @@ Pages를 선택한 이유는 무료 `프로젝트이름.pages.dev` 주소와 Git
 
 운영 주소: https://night-library-394.pages.dev/
 
-Cloudflare D1 `night-library-db`는 이미 생성했으며 전달받은 Database ID를 `wrangler.json`에 반영했습니다. Cloudflare Pages 배포도 완료했습니다. 운영 주소와 개인정보 페이지의 HTTP 200 응답, D1 바인딩 설정을 확인했습니다. Google 로그인 연결과 실제 학습 기록 저장 확인이 남아 있습니다. 이전 Sites 배포는 별개의 사이트이며 그대로 남습니다.
+Cloudflare D1 `night-library-db`와 Pages를 연결했고 운영 주소와 Google Client ID를 `wrangler.json`에 반영했습니다. 사용자가 Google 로그인 성공을 확인했습니다. 실제 학습 기록 저장은 별도로 확인해야 합니다. 이전 Sites 배포는 별개의 사이트이며 그대로 남습니다.
+
+표시 이름은 **잉글담(Engldam)**입니다. GitHub 저장소·Pages 프로젝트·DB의 내부 이름과 운영 주소는 유지합니다. Google 로그인 화면의 이름은 본인 Google Auth Platform의 **Branding → App name**에서 `잉글담`으로 바꿉니다.
 
 `d14c05f4.night-library-394.pages.dev`처럼 앞에 배포 ID가 붙은 주소는 특정 배포의 미리보기 주소입니다. 로그인 설정, 사이트 공유, 심사 신청에는 위의 고정 운영 주소를 사용합니다.
 
@@ -134,7 +136,7 @@ npm.cmd run configure -- --site-url https://night-library-394.pages.dev
 https://console.cloud.google.com/ 에서 진행합니다.
 
 1. 새 프로젝트를 만들거나 본인 프로젝트를 선택합니다.
-2. **Google Auth Platform**에서 Branding·Audience·Data Access 설정을 진행합니다. 앱 이름은 `밤의 서재`, 지원 이메일은 본인 이메일로 입력합니다.
+2. **Google Auth Platform**에서 Branding·Audience·Data Access 설정을 진행합니다. 앱 이름은 `잉글담`, 지원 이메일은 본인 이메일로 입력합니다.
 3. 개인 Google 계정으로 누구나 로그인하게 하려면 Audience는 **External**을 사용합니다. 테스트 중에는 본인 계정을 Test users에 넣습니다.
 4. 로그인에 필요한 범위는 `openid`, `email`, `profile`입니다. Drive·Gmail 등 추가 권한은 필요 없습니다.
 5. **Clients → Create client → Web application**을 만듭니다.
@@ -221,6 +223,46 @@ Google이 "메타 태그" 확인 방법을 제공하면, Pages의 **빌드 환�
 - 영어 글을 추가할 때 원문·번역·해설의 문단 수를 맞춥니다. `npm run build`와 `npm test`로 확인하고 GitHub에 올립니다.
 - 기존 Sites에서 저장했던 기록은 이 DB로 자동 이전되지 않습니다. 기존 사이트의 학습 기록 내보내기로 본인 기록을 백업할 수 있습니다. 새 사이트에는 전체 해석 붙여넣기를 이용해 필요한 내용을 저장할 수 있습니다. 다른 이용자의 계정·기록을 임의로 합치지 않습니다.
 
+## 10. 영어 학습 검색 노출과 사이트 등록
+
+메인 제목과 설명, 각 페이지의 고유한 제목·설명, Open Graph·공유 이미지, canonical, WebSite·Article·BreadcrumbList 구조화된 데이터를 제공합니다. 영어 지문 모음과 공부 방법은 로그인·JavaScript 없이 읽을 수 있는 정적 HTML입니다. `/api/*`와 `/auth/*`에는 `noindex, nofollow` 응답 헤더를 적용합니다. 사용자별 해석과 단어는 공개 페이지나 사이트맵에 넣지 않습니다.
+
+- 지문 모음: https://night-library-394.pages.dev/english-reading/
+- 독해 공부 방법: https://night-library-394.pages.dev/english-reading-guide/
+- 사이트맵: https://night-library-394.pages.dev/sitemap.xml
+- 브랜드·검색 소개: `src/site.ts`
+- 공개 학습 콘텐츠: `scripts/public-pages.tsx`
+- 검색용 HTML 생성: `scripts/render.tsx`
+- 공유 이미지: `public/social-card.svg` 원본과 1200×630 `public/social-card.png`
+
+검색 순위, 추천 피드 노출이나 색인 생성 시점을 보장하지 않습니다. 같은 검색어를 반복하거나 보이지 않는 키워드를 넣지 않습니다. 주제별 지문과 해설은 운영자가 실제 내용과 참고 자료를 확인해 보강합니다.
+
+### Google Search Console
+
+1. https://search.google.com/search-console/ 에서 본인 계정으로 로그인합니다.
+2. **속성 추가 → URL 접두어**에 `https://night-library-394.pages.dev/`를 넣습니다. Pages 기본 주소에서는 DNS를 요구하는 도메인 속성 대신 URL 접두어를 사용합니다.
+3. **HTML 태그** 확인 방법의 `google-site-verification` 메타 태그를 복사합니다. 태그의 실제 `content` 값만 아래 명령으로 설정하거나 연결된 GitHub 작업에 전달해 반영합니다.
+
+```powershell
+npm.cmd run configure -- --google-site-verification 실제확인코드
+```
+
+4. `wrangler.json` 변경을 GitHub에 반영하고 Pages 배포가 완료되면 Search Console에서 **확인**을 누릅니다.
+5. **Sitemaps / 사이트맵**에 `sitemap.xml`을 제출합니다.
+6. URL 검사에서 홈페이지와 지문 모음 URL의 색인 생성 요청을 진행합니다. 이후 검색어·클릭·노출 수를 모니터링합니다.
+
+확인 코드는 계정에서 실제 발급된 값을 사용합니다. 미리보기의 해시 주소를 등록하지 않습니다. 소유권 확인 태그를 나중에 삭제하면 확인이 해제될 수 있습니다. 현재 소유권 확인·사이트맵 제출을 대신 완료한 상태는 아닙니다.
+
+### 네이버 서치어드바이저
+
+https://searchadvisor.naver.com/ 의 웹마스터 도구에 동일한 고정 운영 주소를 등록합니다. HTML 태그 방식의 `naver-site-verification` 확인 코드를 발급받으면 다음 명령으로 설정하고 GitHub 반영·배포 후 소유권 확인을 완료합니다. 이후 사이트맵 제출 메뉴에서 위의 사이트맵 URL을 제출합니다.
+
+```powershell
+npm.cmd run configure -- --naver-site-verification 실제확인코드
+```
+
+검색 확인 코드는 공개 메타 정보이며 비밀 키가 아닙니다. 선택적으로 같은 이름의 빌드 환경 변수 `GOOGLE_SITE_VERIFICATION`, `NAVER_SITE_VERIFICATION`도 지원합니다. 코드의 `wrangler.json`에 이미 설정했다면 중복된 빌드 환경 변수로 덮어쓰지 않도록 한 곳에서 관리합니다. 로그인용 Client ID·Client secret은 검색엔진 소유권 확인 코드와 별개입니다.
+
 ## 문제 해결
 
 | 증상 | 확인할 곳 |
@@ -240,6 +282,10 @@ Google이 "메타 태그" 확인 방법을 제공하면, Pages의 **빌드 환�
 - Pages 설정과 바인딩: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
 - D1 마이그레이션: https://developers.cloudflare.com/d1/reference/migrations/
 - Google 로그인: https://developers.google.com/identity/openid-connect/openid-connect
+- Google 검색 기본 가이드: https://developers.google.com/search/docs/fundamentals/seo-starter-guide?hl=ko
+- 사이트 이름 구조화된 데이터: https://developers.google.com/search/docs/appearance/site-names?hl=ko
+- Search Console 소유권 확인: https://support.google.com/webmasters/answer/9008080?hl=ko
+- 네이버 웹마스터 가이드: https://searchadvisor.naver.com/guide/seo-basic-intro
 - Workers 가격: https://developers.cloudflare.com/workers/platform/pricing/
 - D1 가격: https://developers.cloudflare.com/d1/platform/pricing/
 - 애드센스 사이트 연결: https://support.google.com/adsense/answer/7584263?hl=ko
