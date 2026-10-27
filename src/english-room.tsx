@@ -4,7 +4,7 @@ import {BookOpen,Bookmark,ArrowRight,ArrowLeft,Check,CheckCircle2,ChevronRight,C
 import {englishLessons,catalogId,freshPractice,Practice,SavedWord} from './english-lessons';
 import {Toaster} from 'sonner';
 import {toast} from 'sonner';
-import {SITE_NAME,READING_PATH,GUIDE_PATH} from './site';
+import {SITE_NAME,READING_PATH,GUIDE_PATH,STUDY_PATH} from './site';
 import {useMobileLayout,ScreenSettings,StudyTabs,LessonChooser,type StudyPanel} from './mobile-layout';
 type Props={user:{id:string;name:string}|null};
 type Practices=Record<string,Practice>;
@@ -50,7 +50,7 @@ export default function EnglishRoom({user}:Props){
  function edit(patch:Partial<Practice>){setDrafts(old=>{const next={...old};const value={...(old[selected]??saved[selected]??freshPractice(article.paragraphs.length)),...patch};if(JSON.stringify(value)===JSON.stringify(saved[selected]??freshPractice(article.paragraphs.length)))delete next[selected];else next[selected]=value;return next;});}
  function write(text:string){const translations=[...current.translations];translations[part]=text;const reviewed=[...current.reviewed];reviewed[part]=false;edit({translations,reviewed,completed:false});}
  function showFeedback(){if(!written)return;const next=[...current.reviewed];next[part]=true;edit({reviewed:next});if(compact){fieldRef.current?.blur();requestAnimationFrame(()=>feedbackRef.current?.scrollIntoView({block:'start'}));}}
- function openLesson(id:string){setSelected(id);setPart(0);setView('read');setStudyPanel('read');window.history.replaceState(null,'',`/?lesson=${encodeURIComponent(id)}`);window.scrollTo({top:0,behavior:'smooth'});}
+ function openLesson(id:string){setSelected(id);setPart(0);setView('read');setStudyPanel('read');window.history.replaceState(null,'',`${STUDY_PATH}?lesson=${encodeURIComponent(id)}`);window.scrollTo({top:0,behavior:'smooth'});}
  function selectStudyPanel(next:StudyPanel){setStudyPanel(next);requestAnimationFrame(()=>studyRef.current?.scrollIntoView({block:'start'}));}
  function choosePart(i:number){setPart(i);if(compact)selectStudyPanel('practice');else if(window.innerWidth<960)practiceRef.current?.scrollIntoView({block:'start'});}
  async function mutate(body:unknown){const r=await fetch('/api/english',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json() as ApiData;if(!r.ok)throw Error(d.error??'저장하지 못했어요.');return d;}

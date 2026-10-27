@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync,readdirSync,mkdirSync,existsSync} from 'node:fs';
 import {build} from 'esbuild';
+import {runInNewContext} from 'node:vm';
 import {SignJWT,generateKeyPair,exportJWK,createLocalJWKSet} from 'jose';
 
 mkdirSync('.cache',{recursive:true});
@@ -119,7 +120,7 @@ test('Google login binds state, nonce and PKCE to a signed HttpOnly cookie',asyn
   const flowCookie=cookiePair(login,'__Host-nl-flow');assert.ok(flowCookie);assert.match(login.headers.get('set-cookie'),/HttpOnly/);assert.match(login.headers.get('set-cookie'),/Secure/);
   let callback=await auth.callback(req('/auth/callback?state=wrong&code=test',{headers:{cookie:flowCookie}}),env);assert.equal(called,0);assert.match(callback.headers.get('location'),/auth_error/);
   callback=await auth.callback(req('/auth/callback?state='+state+'&code=test',{headers:{cookie:flowCookie}}),env);
-  assert.equal(callback.status,303);assert.equal(callback.headers.get('location'),'/');assert.equal(called,1);assert.equal(await digest(verifier),u.searchParams.get('code_challenge'));
+  assert.equal(callback.status,303);assert.equal(callback.headers.get('location'),'/study/');assert.equal(called,1);assert.equal(await digest(verifier),u.searchParams.get('code_challenge'));
   const savedCookie=cookiePair(callback,'__Host-nl-session');assert.ok(savedCookie);assert.equal((await getUser(req('/api/session',{headers:{cookie:savedCookie}}),env)).userId,'google:google-alice');
   const row=db.sqlite.prepare('SELECT token_hash FROM auth_sessions').get();assert.notEqual(row.token_hash,savedCookie.split('=')[1]);
   assert.deepEqual(Object.keys(db.sqlite.prepare('SELECT * FROM auth_users').get()).sort(),['display_name','email','id','updated_at']);
@@ -150,10 +151,29 @@ test('real RSA ID-token verification checks issuer, audience, signature and expi
 
 test('static output contains crawlable lesson text and does not bundle credentials or old auth routes',()=>{
   for(const lesson of englishLessons){assert.equal(lesson.paragraphs.length,lesson.guides.length);assert.equal(lesson.paragraphs.length,lesson.translation.length);assert.ok(lesson.guides.every(g=>g.structure&&g.checks.length&&g.natural));}
-  const html=readFileSync('dist/index.html','utf8');assert.ok(html.includes(englishLessons[0].paragraphs[0]));assert.ok(html.includes('개인정보'));
+  const html=readFileSync('dist/study/index.html','utf8');assert.ok(html.includes(englishLessons[0].paragraphs[0]));assert.ok(html.includes('개인정보'));
   const routes=JSON.parse(readFileSync('dist/_routes.json','utf8'));assert.deepEqual(routes.include,['/api/*','/auth/*']);
   for(const file of readdirSync('dist/assets').filter(f=>f.endsWith('.js'))){const js=readFileSync('dist/assets/'+file,'utf8');assert.equal(js.includes('GOOGLE_CLIENT_SECRET'),false);assert.equal(js.includes('SESSION_SECRET'),false);assert.equal(js.includes('signin-with-chatgpt'),false);}
   assert.equal(html.includes('adsbygoogle.js'),false);assert.ok(readFileSync('dist/privacy/index.html','utf8').includes('Google'));
+});
+
+test('homepage introduces the site and old lesson links still lead to the learning screen',()=>{
+  const home=readFileSync('dist/index.html','utf8');
+  const about=readFileSync('dist/about/index.html','utf8');
+  assert.match(home,/ABOUT ENGLDAM/);
+  assert.match(home,/<a class="button primary" href="\/study\/">영어 공부 시작하기/);
+  assert.equal(home.includes('배경지식을 넓히는 읽기'),false);
+  assert.equal(about.includes('배경지식을 넓히는 읽기'),false);
+  assert.equal(home.includes('type="module"'),false,'the introduction needs no React startup');
+  const study=readFileSync('dist/study/index.html','utf8');
+  assert.ok(study.includes('type="module"'));assert.ok(study.includes(englishLessons[0].paragraphs[0]));
+  const script=home.match(/<script data-legacy-study>(.*?)<\/script>/s)?.[1];assert.ok(script);
+  for(const [search,expected] of [['',null],['?utm_source=example',null],['?lesson=en-seeds','/study/?lesson=en-seeds#paragraph-2'],['?auth_error=cancelled','/study/?auth_error=cancelled#paragraph-2']]){
+    let target=null;
+    runInNewContext(script,{URL,window:{location:{href:'https://example.test/'+search+'#paragraph-2',replace(value){target=value;}}}});
+    assert.equal(target,expected);
+  }
+  assert.ok(readFileSync('dist/sitemap.xml','utf8').includes('/study/'));
 });
 
 test('public learning pages are discoverable, consistently branded and keep private routes out of indexing',()=>{

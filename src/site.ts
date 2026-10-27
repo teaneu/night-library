@@ -6,6 +6,7 @@ export const SITE_TITLE = '잉글담 | 영어 독해·해석 연습과 나만의
 export const SITE_DESCRIPTION = '영어 원문을 직접 해석하고 문단별 참고 번역과 구문 해설로 점검하세요. 경제·심리·기술·과학·환경·통계 주제의 영어 독해 지문, 단어장과 나만의 학습 기록을 잉글담에서 만나보세요.';
 export const READING_PATH = '/english-reading/';
 export const GUIDE_PATH = '/english-reading-guide/';
+export const STUDY_PATH = '/study/';
 
 export type LessonSearchInfo = {title:string;description:string;focus:string};
 export const lessonSearchInfo:Record<string,LessonSearchInfo> = {

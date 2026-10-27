@@ -5,8 +5,8 @@ import type {ReactNode} from 'react';
 import App from '../src/app';
 import {articles} from '../src/articles';
 import {englishLessons} from '../src/english-lessons';
-import {SITE_NAME,SITE_ENGLISH_NAME,SITE_TITLE,SITE_DESCRIPTION,READING_PATH,GUIDE_PATH,lessonSearchInfo} from '../src/site';
-import {PublicLayout,EnglishDirectory,StudyGuide,About,Privacy,ArticlePage} from './public-pages';
+import {SITE_NAME,SITE_ENGLISH_NAME,SITE_TITLE,SITE_DESCRIPTION,READING_PATH,GUIDE_PATH,STUDY_PATH,lessonSearchInfo} from '../src/site';
+import {PublicLayout,Home,EnglishDirectory,StudyGuide,About,Privacy,ArticlePage} from './public-pages';
 
 const escape=(s:string)=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const jsonLd=(value:unknown)=>JSON.stringify(value).replaceAll('<','\\u003c');
@@ -27,6 +27,7 @@ export async function render(origin:string,options:RenderOptions={}){
   }
 
   const routes:Route[]=[
+    {path:STUDY_PATH,title:'영어 해석 연습과 단어장 | 잉글담',description:'잉글담의 영어 지문을 직접 한국어로 해석하고 준비된 문단별 번역·구문 해설로 점검하세요. 모바일 화면과 단어장, 로그인 후 학습 기록 저장을 제공합니다.',node:<App/>},
     {path:READING_PATH,title:'영어 독해 지문 모음 · 원문·해석·해설 | 잉글담',description:'경제·심리·기술·과학·환경·통계 주제의 영어 독해 지문을 읽고 문단별 참고 해석과 구문 해설로 공부하세요. 핵심 단어와 예문, 직접 해석하는 연습 화면을 제공합니다.',kind:'collection',node:<EnglishDirectory/>},
     {path:GUIDE_PATH,title:'영어 독해 공부법 · 문장 해석과 단어 복습 | 잉글담',description:'영어 문장을 직접 해석하고 참고 번역과 비교하는 독해 공부법을 알아보세요. 실제 예문으로 주어·동사, 부분 부정, 단어장 복습 방법을 설명합니다.',node:<StudyGuide/>},
     {path:'/about/',title:'잉글담 소개 | 스스로 해석하는 영어 공부',description:'잉글담은 영어 읽기와 해석 연습, 참고 해설, 나만의 단어장과 학습 기록을 제공하는 영어 독해 학습 공간입니다. 운영과 학습 자료의 범위를 안내합니다.',node:<About/>},
@@ -61,13 +62,19 @@ export async function render(origin:string,options:RenderOptions={}){
   }
 
   const home={path:'/',title:SITE_TITLE,description:SITE_DESCRIPTION};
-  const homeTemplate=html.replace(/<title>[\s\S]*?<\/title>/g,'').replace(/<meta\b[^>]*name="description"[^>]*>/g,'');
-  await writeFile('dist/index.html',homeTemplate.replace('<!--ssg-->',renderToString(<App/>)).replace('</head>',head(home)+'</head>'));
+  const appTemplate=html.replace(/<title>[\s\S]*?<\/title>/g,'').replace(/<meta\b[^>]*name="description"[^>]*>/g,'');
+  // Preserve previously shared root lesson links without running a Function on homepage visits.
+  const legacyStudy=`<script data-legacy-study>const u=new URL(window.location.href);if(u.searchParams.has('lesson')||u.searchParams.has('auth_error'))window.location.replace(${JSON.stringify(STUDY_PATH)}+u.search+u.hash);</script>`;
+  await writeFile('dist/index.html',`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#254ee8"><link rel="icon" href="/favicon.svg">${styles}${head(home)}${legacyStudy}</head><body>${renderToStaticMarkup(<Home/>)}</body></html>`);
   for(const r of routes){
     const file='dist'+r.path+'index.html';await mkdir(dirname(file),{recursive:true});
+    if(r.path===STUDY_PATH){
+      await writeFile(file,appTemplate.replace('<!--ssg-->',renderToString(r.node)).replace('</head>',head(r)+'</head>'));
+      continue;
+    }
     await writeFile(file,`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#254ee8"><link rel="icon" href="/favicon.svg">${styles}${head(r)}</head><body>${renderToStaticMarkup(r.node)}</body></html>`);
   }
-  await writeFile('dist/404.html',`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="robots" content="noindex"><title>페이지를 찾지 못했어요 | 잉글담</title>${styles}</head><body>${renderToStaticMarkup(<PublicLayout><section className="info-sheet"><h1>이 페이지를 찾지 못했어요.</h1><a className="button primary" href="/">영어 해석 연습으로 돌아가기</a></section></PublicLayout>)}</body></html>`);
+  await writeFile('dist/404.html',`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="robots" content="noindex"><title>페이지를 찾지 못했어요 | 잉글담</title>${styles}</head><body>${renderToStaticMarkup(<PublicLayout><section className="info-sheet"><h1>이 페이지를 찾지 못했어요.</h1><a className="button primary" href={STUDY_PATH}>영어 해석 연습으로 돌아가기</a></section></PublicLayout>)}</body></html>`);
   await writeFile('dist/robots.txt','User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /auth/\n'+(origin?'Sitemap: '+origin+'/sitemap.xml\n':''));
   if(origin){
     const paths=['/',...routes.filter(r=>r.path!=='/privacy/').map(r=>r.path)];

@@ -10,7 +10,7 @@ mkdirSync('.cache',{recursive:true});
 await build({entryPoints:['src/english-room.tsx'],outfile:'.cache/mobile-room.mjs',bundle:true,platform:'node',format:'esm',packages:'external',jsx:'automatic'});
 
 test('mobile study tabs, screen preference and lesson changes preserve drafts and allow account saving',async()=>{
-  const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>',{url:'https://example.test/',pretendToBeVisual:true});
+  const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>',{url:'https://example.test/study/',pretendToBeVisual:true});
   const w=dom.window;let width=390;
   const queries=[];
   w.matchMedia=query=>{
@@ -49,7 +49,7 @@ test('mobile study tabs, screen preference and lesson changes preserve drafts an
     const lessons=w.document.querySelectorAll('.en-lesson-picker>button');assert.equal(lessons.length,10);
     await click(lessons[9]);assert.equal(query('#en-lesson-options').hidden,true);
     assert.match(query('.en-current-number').textContent,/10\s*\/\s*10/);
-    assert.match(w.location.search,/lesson=en-urban-heat/);
+    assert.equal(w.location.pathname,'/study/');assert.match(w.location.search,/lesson=en-urban-heat/);
     await click(query('#en-tab-practice'));
     assert.equal(query('#en-panel-read').hidden,true);assert.equal(query('#en-panel-practice').hidden,false);
     await click(w.document.querySelectorAll('.en-part-tabs>button')[1]);

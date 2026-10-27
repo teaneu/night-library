@@ -41,7 +41,7 @@ function redirect(location:string,cookies:string[]=[]){
   return new Response(null,{status:303,headers});
 }
 function setupPage(){
-  return new Response('<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>로그인 연결 안내</title><body><main><h1>로그인 연결을 준비하고 있어요.</h1><p>읽기와 해설은 지금도 이용할 수 있어요. 운영자의 Google 로그인·데이터베이스 설정 후 기록 저장이 열립니다.</p><a href="/">학습 화면으로 돌아가기</a></main></body></html>',{status:503,headers:{...privateHeaders,'Content-Type':'text/html; charset=utf-8'}});
+  return new Response('<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>로그인 연결 안내</title><body><main><h1>로그인 연결을 준비하고 있어요.</h1><p>읽기와 해설은 지금도 이용할 수 있어요. 운영자의 Google 로그인·데이터베이스 설정 후 기록 저장이 열립니다.</p><a href="/study/">학습 화면으로 돌아가기</a></main></body></html>',{status:503,headers:{...privateHeaders,'Content-Type':'text/html; charset=utf-8'}});
 }
 
 export function validateGoogleClaims(p:JWTPayload,clientId:string,nonce:string){
@@ -73,7 +73,7 @@ export function createAuth(deps:Dependencies={}){
       if(!configured(env))return setupPage();
       if(new URL(request.url).origin!==appOrigin(env))return json({error:'사이트 주소가 일치하지 않습니다.'},400);
       const clear=cookie(request,'flow','',0);
-      const fail=(kind='failed')=>redirect('/?auth_error='+kind,[clear]);
+      const fail=(kind='failed')=>redirect('/study/?auth_error='+kind,[clear]);
       try{
         const raw=readCookie(request,'flow');if(!raw||raw.length>3000)return fail('expired');
         const {payload}=await jwtVerify(raw,encoder.encode(env.SESSION_SECRET!),{algorithms:['HS256'],issuer:'night-library',audience:'google-flow',requiredClaims:['exp','iat']});
@@ -96,7 +96,7 @@ export function createAuth(deps:Dependencies={}){
         ];
         if(/^[A-Za-z0-9_-]{43}$/.test(old))statements.push(env.DB.prepare('DELETE FROM auth_sessions WHERE token_hash=?').bind(await digest(old)));
         await env.DB.batch(statements);
-        return redirect('/',[clear,cookie(request,'session',token,SESSION_SECONDS)]);
+        return redirect('/study/',[clear,cookie(request,'session',token,SESSION_SECONDS)]);
       }catch{return fail();}
     },
   };

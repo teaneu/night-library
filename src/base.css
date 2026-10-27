@@ -61,6 +61,26 @@
 .related-reading>h2{font-size:1.2rem;margin-bottom:22px}
 .related-reading .reading-cards{grid-template-columns:1fr}
 .related-reading .reading-card{padding:23px 26px}
+.welcome-heading{margin-bottom:42px}
+.welcome-heading>p:not(.eyebrow){max-width:650px;font-size:1rem;line-height:1.95;color:var(--muted-foreground);word-break:keep-all}
+.welcome-heading .welcome-actions{margin:26px 0 18px}
+.welcome-actions .button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:12px 22px;font-size:.95rem}
+.welcome-heading>p.welcome-note{font-size:.82rem;line-height:1.9;margin-top:18px}
+.welcome-steps{max-width:800px;margin:0 auto 34px}
+.welcome-steps>h2{font-size:1.3rem;font-weight:650;letter-spacing:-.03em;margin:0 0 20px;line-height:1.7}
+.welcome-steps>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.welcome-steps article{padding:24px 22px;border:1px solid var(--border);border-radius:10px;background:var(--card);min-width:0}
+.welcome-steps article>span{font:23px Georgia,serif;color:var(--primary)}
+.welcome-steps h3{font-size:1rem;line-height:1.7;margin:16px 0 8px;font-weight:650;word-break:keep-all}
+.welcome-steps article>p{font-size:.875rem;line-height:1.95;color:var(--muted-foreground);margin:0;overflow-wrap:anywhere}
+.welcome-more>h2:first-child{margin-top:0}
+@media(max-width:640px){
+ .welcome-actions{flex-direction:column}
+ .welcome-actions .button{width:100%}
+ .welcome-steps>div{grid-template-columns:1fr;gap:12px}
+ .welcome-steps article{padding:21px 23px}
+ .welcome-steps h3{margin-top:10px}
+}
 @media(max-width:800px){
  .public-nav a,.footer nav a{display:inline-flex;align-items:center;min-height:44px}
  .reading-explanation summary{min-height:44px}
