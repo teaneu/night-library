@@ -1,4 +1,5 @@
 import { articles } from './articles';
+import {additionalEnglishContent} from './english-expansion';
 
 export type Guide = { title: string; structure: string; checks: string[]; expression: string; natural: string };
 const guides: Record<string, Guide[]> = {
@@ -23,7 +24,8 @@ const guides: Record<string, Guide[]> = {
   {title:'바로 얻는 결과와 남겨 두는 가능성',structure:'Some ... Others ...는 두 종류의 행동을 대조합니다. by producing은 도움이 되는 방식을 설명합니다. while reminding은 부가적인 의미를 연결합니다.',checks:['즉각적인 성과와 미래 가능성을 남기는 행동을 구분했나요?','within reach를 실현 가능한 범위로 옮겼나요?'],expression:'within reach → 실현 가능한 범위에',natural:'ongoing responsibility는 보관하고 끝나는 일이 아니라 계속 돌봐야 하는 책임이라는 뜻입니다.'}
  ]
 };
-export const englishLessons = articles.filter(a => a.language === 'en').map(a => ({...a, guides: guides[a.id] ?? []}));
+const additionalGuides=Object.fromEntries(additionalEnglishContent.map(lesson=>[lesson.article.id,lesson.guides]));
+export const englishLessons = articles.filter(a => a.language === 'en').map(a => ({...a, guides: guides[a.id] ?? additionalGuides[a.id] ?? []}));
 export type EnglishLesson = typeof englishLessons[number];
 export type Practice = {translations:string[]; reviewed:boolean[]; completed:boolean; updatedAt?:string};
 export type SavedWord = {id:string;articleId:string;term:string;meaning:string;example:string;known:boolean;reviews:number;updatedAt:string};

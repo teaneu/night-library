@@ -1,3 +1,5 @@
+import {additionalEnglishContent} from './english-expansion';
+
 export type Article = {id:string;language:'ko'|'en';category:string;title:string;subtitle:string;minutes:number;concept:string;paragraphs:string[];translation?:string[];vocabulary:{term:string;meaning:string;example:string}[];questions?:{question:string;options:string[];answer:number;explanation:string}[];prompt:string;sources:{name:string;url:string}[]};
 export const articles: Article[] = [
 {
@@ -84,6 +86,7 @@ vocabulary:[{term:'preserve',meaning:'보존하다',example:'A seed bank preserv
 questions:[{question:'What is the main value discussed in the article?',options:['Making every seed grow immediately','Preserving material and future options','Replacing all natural habitats','Keeping unnamed packets'],answer:1,explanation:'종자은행은 살아 있는 재료와 미래에 활용할 선택지를 남긴다.'},{question:'Why is documentation important?',options:['It makes freezers colder','It replaces germination tests','It records identity and collection context','It turns seeds into digital files'],answer:2,explanation:'어떤 식물에서, 어디서 수집한 씨앗인지 기록해야 활용할 수 있다.'},{question:'All seeds tolerate drying and freezing. True or false?',options:['True','False'],answer:1,explanation:'건조에 약하거나 통상적인 냉동 보관에서 오래 유지되지 않는 종이 있다.'},{question:'What does “within reach” mean in the final paragraph?',options:['Inside a person’s hand','Already completed','Impossible to achieve','Still possible to achieve'],answer:3,explanation:'미래의 결과가 실현 가능한 범위에 남아 있다는 뜻이다.'}],
 prompt:'당장 쓰지 않더라도 보관해 두면 미래의 선택지를 늘리는 것은 무엇일까?',
 sources:[{name:'Kew · Seed collection',url:'https://www.kew.org/science/collections-and-resources/collections/seed-collection'},{name:'Kew · Seeds for life',url:'https://www.kew.org/read-and-watch/seeds-for-life'},{name:'Kew · How to preserve seeds for the future',url:'https://www.kew.org/read-and-watch/seed-collecting-msb'}]
-}
+},
+...additionalEnglishContent.map(lesson=>lesson.article)
 ];
 export const previousTopics = ['전력과 AI 데이터센터','편리함의 숨은 비용','지루함과 주의력','수리와 전자폐기물','직장의 AI 도입','하이브리드 근무','별빛과 과거','화폐의 시간 가치','도시와 낯선 사람의 협력','기억의 변화','빛공해','정밀한 시간과 표준시','비행 원리','화폐와 신뢰','항생제','교통 방향','지도 투영','냉장고','도시와 물류','인터넷','소금','사회 규범','인플레이션','60진법','방언 형성','연관통','유리의 투명성','계절의 열과 지구온난화'];

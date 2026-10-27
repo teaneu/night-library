@@ -27,7 +27,7 @@ export async function render(origin:string,options:RenderOptions={}){
   }
 
   const routes:Route[]=[
-    {path:READING_PATH,title:'영어 독해 지문 모음 · 원문·해석·해설 | 잉글담',description:'과학·환경·통계 주제의 영어 독해 지문을 읽고 문단별 참고 해석과 구문 해설로 공부하세요. 핵심 단어와 예문, 직접 해석하는 연습 화면을 제공합니다.',kind:'collection',node:<EnglishDirectory/>},
+    {path:READING_PATH,title:'영어 독해 지문 모음 · 원문·해석·해설 | 잉글담',description:'경제·심리·기술·과학·환경·통계 주제의 영어 독해 지문을 읽고 문단별 참고 해석과 구문 해설로 공부하세요. 핵심 단어와 예문, 직접 해석하는 연습 화면을 제공합니다.',kind:'collection',node:<EnglishDirectory/>},
     {path:GUIDE_PATH,title:'영어 독해 공부법 · 문장 해석과 단어 복습 | 잉글담',description:'영어 문장을 직접 해석하고 참고 번역과 비교하는 독해 공부법을 알아보세요. 실제 예문으로 주어·동사, 부분 부정, 단어장 복습 방법을 설명합니다.',node:<StudyGuide/>},
     {path:'/about/',title:'잉글담 소개 | 스스로 해석하는 영어 공부',description:'잉글담은 영어 읽기와 해석 연습, 참고 해설, 나만의 단어장과 학습 기록을 제공하는 영어 독해 학습 공간입니다. 운영과 학습 자료의 범위를 안내합니다.',node:<About/>},
     {path:'/privacy/',title:'개인정보 안내 | 잉글담',description:'잉글담의 Google 로그인, 학습 기록과 단어장, 필수 쿠키와 데이터 보관에 대한 안내입니다.',node:<Privacy/>},

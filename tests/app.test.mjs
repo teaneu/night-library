@@ -66,6 +66,29 @@ test('translation ownership, completion validation, CSRF, pagination and reviews
   db.sqlite.close();
 });
 
+test('new six-paragraph lessons save independently and their catalog words remain user-scoped',async()=>{
+  const db=database();const env=makeEnv(db);const alice=await session(db);const bob=await session(db,'bob','b'.repeat(43));
+  const added=englishLessons.filter(a=>a.id!=='en-average'&&a.id!=='en-seeds');
+  assert.equal(added.length,8);
+  for(const lesson of added){
+    const call=body=>worker.fetch(req('/api/english',{method:'PUT',headers:{cookie:alice,origin,'content-type':'application/json'},body:JSON.stringify(body)}),env);
+    const practice={type:'practice',articleId:lesson.id,translations:lesson.paragraphs.map((_,i)=>lesson.id+' 문단 '+(i+1)),reviewed:lesson.paragraphs.map(()=>true),completed:true};
+    assert.equal((await call(practice)).status,200,lesson.id);
+    const word=catalogWords.find(w=>w.articleId===lesson.id);assert.ok(word,lesson.id);
+    assert.equal((await call({type:'catalog',id:word.id})).status,200,word.id);
+  }
+  const own=await (await worker.fetch(req('/api/english',{headers:{cookie:alice}}),env)).json();
+  assert.equal(own.practices.length,8);assert.equal(own.totalWords,8);
+  for(const lesson of added){
+    const saved=own.practices.find(p=>p.articleId===lesson.id);assert.ok(saved?.completed,lesson.id);
+    assert.deepEqual(saved.translations,lesson.paragraphs.map((_,i)=>lesson.id+' 문단 '+(i+1)));
+    assert.ok(own.vocabulary.some(w=>w.articleId===lesson.id),lesson.id);
+  }
+  const other=await (await worker.fetch(req('/api/english',{headers:{cookie:bob}}),env)).json();
+  assert.deepEqual(other.practices,[]);assert.deepEqual(other.vocabulary,[]);
+  db.sqlite.close();
+});
+
 test('legacy saved words still load and can be reviewed without duplicate counts',async()=>{
   const db=database();const env=makeEnv(db);const cookie=await session(db);const word=catalogWords[1];
   db.sqlite.prepare('INSERT INTO words VALUES (?,?,?)').run('alice',word.id.slice(8),new Date().toISOString());
