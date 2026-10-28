@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 import {articles} from '../src/articles';
 import {englishLessons} from '../src/english-lessons';
-import {SITE_NAME,READING_PATH,GUIDE_PATH,STUDY_PATH,lessonSearchInfo} from '../src/site';
+import {SITE_NAME,READING_PATH,GUIDE_PATH,STUDY_PATH,ERROR_REPORT_LINK,ERROR_REPORT_EMAIL,lessonSearchInfo} from '../src/site';
 
 export function PublicLayout({children,current}:{children:ReactNode;current?:string}){
   return <div className="workspace">
@@ -11,7 +11,7 @@ export function PublicLayout({children,current}:{children:ReactNode;current?:str
       <nav className="public-nav" aria-label="사이트 메뉴">{[[STUDY_PATH,'해석 연습'],[READING_PATH,'지문 모음'],[GUIDE_PATH,'공부 방법'],['/about/','소개']].map(([href,name])=><a key={href} href={href} aria-current={current===href?'page':undefined}>{name}</a>)}</nav>
     </header>
     <main className="public-main" id="main-content">{children}</main>
-    <footer className="footer"><span>{SITE_NAME} <i>/</i> teaneu</span><nav aria-label="사이트 안내"><a href="/about/">소개</a><a href="/privacy/">개인정보</a></nav></footer>
+    <footer className="footer"><span>{SITE_NAME} <i>/</i> teaneu</span><nav aria-label="사이트 안내"><a href="/about/">소개</a><a href="/privacy/">개인정보</a><a href={ERROR_REPORT_LINK} title={ERROR_REPORT_EMAIL}>오류 제보</a></nav></footer>
   </div>;
 }
 

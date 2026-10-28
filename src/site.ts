@@ -7,6 +7,8 @@ export const SITE_DESCRIPTION = '영어 원문을 직접 해석하고 문단별 
 export const READING_PATH = '/english-reading/';
 export const GUIDE_PATH = '/english-reading-guide/';
 export const STUDY_PATH = '/study/';
+export const ERROR_REPORT_EMAIL = 'ubteaneu@gmail.com';
+export const ERROR_REPORT_LINK = `mailto:${ERROR_REPORT_EMAIL}?subject=${encodeURIComponent(`[${SITE_NAME}] 오류 제보`)}&body=${encodeURIComponent('문제가 발생한 페이지:\r\n사용 기기/브라우저:\r\n오류 내용:\r\n재현 방법:\r\n')}`;
 
 export type LessonSearchInfo = {title:string;description:string;focus:string};
 export const lessonSearchInfo:Record<string,LessonSearchInfo> = {
