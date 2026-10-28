@@ -75,6 +75,15 @@
 .english-app[data-compact=true] .en-part-tabs>button{width:44px;height:44px;font-size:14px}
 .english-app[data-compact=true] .en-active-source{max-height:none;padding:15px}
 .english-app[data-compact=true] .en-active-source p{font-size:17px}
+.en-source-frame{margin-bottom:20px;min-width:0}
+.en-source-frame .en-active-source{margin-bottom:0}
+.en-source-frame.resizable{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--muted)}
+.en-source-frame.resizable .en-active-source{border-radius:0;overflow-y:auto;overflow-wrap:anywhere;overscroll-behavior-y:contain;touch-action:pan-y pinch-zoom;scrollbar-gutter:stable}
+.en-active-source:focus-visible{outline:2px solid var(--primary);outline-offset:-3px}
+.en-source-resizer{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:10px;border-top:1px solid var(--border);background:var(--card);color:var(--muted-foreground);font-size:12px;line-height:1.6;cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none}
+.en-source-resizer:hover,.en-source-resizer:focus-visible{background:var(--secondary);color:var(--primary)}
+.en-source-resizer:focus-visible{outline:2px solid var(--primary);outline-offset:-3px}
+.en-resize-grip{display:inline-block;width:28px;height:6px;border-top:2px solid currentColor;border-bottom:2px solid currentColor;flex-shrink:0}
 .english-app[data-compact=true] .en-translation{font-size:16px;min-height:210px;padding:13px}
 .english-app[data-compact=true] .en-input-label{font-size:13px;line-height:1.8}
 .english-app[data-compact=true] .en-input-bottom{flex-wrap:wrap}

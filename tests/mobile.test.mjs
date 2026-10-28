@@ -9,7 +9,7 @@ import {renderToString} from 'react-dom/server';
 mkdirSync('.cache',{recursive:true});
 await build({entryPoints:['src/english-room.tsx'],outfile:'.cache/mobile-room.mjs',bundle:true,platform:'node',format:'esm',packages:'external',jsx:'automatic'});
 
-test('mobile study tabs, screen preference and lesson changes preserve drafts and allow account saving',async()=>{
+test('mobile panels and paragraph resizing preserve drafts, preferences and account saving',async()=>{
   const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>',{url:'https://example.test/study/',pretendToBeVisual:true});
   const w=dom.window;let width=390;
   const queries=[];
@@ -19,6 +19,10 @@ test('mobile study tabs, screen preference and lesson changes preserve drafts an
     queries.push(media);return media;
   };
   w.HTMLElement.prototype.scrollIntoView=function(){};w.scrollTo=()=>{};
+  const captured=new WeakMap();
+  w.HTMLElement.prototype.setPointerCapture=function(id){captured.set(this,id);};
+  w.HTMLElement.prototype.hasPointerCapture=function(id){return captured.get(this)===id;};
+  w.HTMLElement.prototype.releasePointerCapture=function(){captured.delete(this);};
   const originals=new Map();
   for(const [name,value] of Object.entries({window:w,document:w.document,navigator:w.navigator,HTMLElement:w.HTMLElement,localStorage:w.localStorage,sessionStorage:w.sessionStorage,requestAnimationFrame:callback=>setTimeout(()=>callback(0),0),cancelAnimationFrame:clearTimeout,IS_REACT_ACT_ENVIRONMENT:true})){
     originals.set(name,Object.getOwnPropertyDescriptor(globalThis,name));Object.defineProperty(globalThis,name,{value,writable:true,configurable:true});
@@ -35,6 +39,12 @@ test('mobile study tabs, screen preference and lesson changes preserve drafts an
   const click=async element=>act(async()=>{element.click();});
   const select=async value=>act(async()=>{const element=query('#en-screen-preference');element.value=value;element.dispatchEvent(new w.Event('change',{bubbles:true}));});
   const resize=async next=>act(async()=>{width=next;for(const media of queries)media.dispatch();});
+  const pointer=async(type,y,id=7)=>act(async()=>{
+    const event=new w.MouseEvent(type,{clientY:y,button:0,bubbles:true});
+    Object.defineProperties(event,{pointerId:{value:id},isPrimary:{value:true},pointerType:{value:'touch'}});
+    query('.en-source-resizer').dispatchEvent(event);
+  });
+  const resizeKey=async key=>act(async()=>{const handle=query('.en-source-resizer');handle.focus();handle.dispatchEvent(new w.KeyboardEvent('keydown',{key,bubbles:true}));});
   try{
     container.innerHTML=renderToString(createElement(EnglishRoom,{user:null}));
     await act(async()=>{root=hydrateRoot(container,createElement(EnglishRoom,{user:null}),{onRecoverableError:error=>hydrationErrors.push(error)});});
@@ -59,12 +69,31 @@ test('mobile study tabs, screen preference and lesson changes preserve drafts an
       textarea.dispatchEvent(new w.Event('input',{bubbles:true}));
     });
     assert.equal(JSON.parse(w.sessionStorage.getItem('english-room:draft:guest'))['en-urban-heat'].translations[1],draft);
+    const original=query('#en-active-paragraph');
+    assert.equal(original.style.height,'220px');
+    textarea.focus();
+    await pointer('pointerdown',200);assert.equal(captured.get(query('.en-source-resizer')),7);
+    assert.equal(w.document.activeElement,textarea,'touch resizing must not blur the translation input');
+    await pointer('pointermove',300,8);assert.equal(original.style.height,'220px','ignore another pointer');
+    await pointer('pointermove',300);assert.equal(original.style.height,'320px');
+    await pointer('pointerup',300);assert.equal(w.localStorage.getItem('engldam-source-height'),'320');
+    assert.equal(captured.has(query('.en-source-resizer')),false);
+    await pointer('pointermove',500);assert.equal(original.style.height,'320px','ended drags cannot resize');
+    await resizeKey('End');assert.equal(original.style.height,'640px');
+    await pointer('pointerdown',200);await pointer('pointermove',-1000);assert.equal(original.style.height,'120px');
+    await pointer('pointercancel',-1000);assert.equal(w.localStorage.getItem('engldam-source-height'),'120');
+    await resizeKey('ArrowDown');assert.equal(original.style.height,'144px');
+    assert.equal(query('.en-source-resizer').getAttribute('aria-valuenow'),'144');
+    original.scrollTop=42;
+    await click(w.document.querySelectorAll('.en-part-tabs>button')[2]);assert.equal(original.scrollTop,0);
+    await click(w.document.querySelectorAll('.en-part-tabs>button')[1]);assert.equal(textarea.value,draft);
     await click(query('#en-tab-vocabulary'));assert.equal(query('#en-panel-vocabulary').hidden,false);
     await click(query('#en-tab-read'));await click(query('#en-tab-practice'));
     assert.equal(query('#en-translation'),textarea);assert.equal(textarea.value,draft);
     await select('mobile');assert.equal(w.localStorage.getItem('engldam-screen'),'mobile');
     await resize(1280);assert.equal(query('.english-app').dataset.compact,'true');
     await select('auto');assert.equal(query('.english-app').dataset.compact,'false');
+    assert.equal(w.document.querySelector('.en-source-resizer'),null);assert.equal(original.style.height,'');
     assert.equal(w.document.querySelector('[role="tablist"]'),null);
     assert.equal(query('#en-panel-read').hidden,false);assert.equal(query('#en-panel-practice').hidden,false);assert.equal(query('#en-panel-vocabulary').hidden,false);
     assert.equal(query('#en-translation').value,draft);
@@ -78,6 +107,7 @@ test('mobile study tabs, screen preference and lesson changes preserve drafts an
     await act(async()=>{root=createRoot(container);root.render(createElement(EnglishRoom,{user:{id:'alice',name:'Alice'}}));});
     assert.equal(query('#en-screen-preference').value,'mobile');assert.equal(query('.english-app').dataset.compact,'true');
     await click(query('#en-tab-practice'));
+    assert.equal(query('#en-active-paragraph').style.height,'144px','restore height after remount');
     await click(query('.en-input-bottom .secondary'));
     assert.equal(saved.length,1);assert.equal(saved[0].articleId,'en-urban-heat');assert.equal(saved[0].translations[1],draft);
   }finally{
